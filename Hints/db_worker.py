@@ -44,7 +44,7 @@ class DbWorker:
 
     def create_user_data_table(self):
         try:
-            print(">>create_user_data_table")
+            # print(">>create_user_data_table")
             self.exec("""CREATE TABLE IF NOT EXISTS main.user_data ( 
                         user_id integer not null primary key ,
                         first_name text, 

@@ -20,11 +20,11 @@ Users Db contains two tables:
     user_data - contain updated data about user(user_id, first_name, last_name, age, gender, experience) 
 """
 # done: add new table user_data
-# todo: add method that whould filter all messages by user id
+# todo: add method that would filter all messages by user id
 # todo: add method that will insert data in to user_data table
-# todo: add method that will read data for the user wich asked for it
-# todo: add error handling table(save handled exeption with stacktrace
-#       and message that affecte it
+# todo: add method that will read data for the user which asked for it
+# todo: add error handling table(save handled exception with stacktrace
+#       and message that affect it
 import logging
 from pathlib import Path
 from typing import Dict
@@ -78,23 +78,21 @@ def facts_to_str(user_data: Dict[str, str]) -> str:
 
 # region     Handlers
 def start(update: Update, context: CallbackContext) -> int:
+    print('...'+start.__name__ + '()')
+    save_message_to_db(update, context)
+
     update.message.reply_text(
             "Hi! My name is Doctor Botter. I will hold a more complex conversation with you. "
             "Why don't you tell me something about yourself?",
             reply_markup=markup,
             )
-    print('Context:')
-    print(context)
-    print('Update:')
-    print(update)
 
-    print('User:')
-    print(update['message']['chat'])
 
     return CHOOSING
 
 
 def regular_choice(update: Update, context: CallbackContext) -> int:
+    print('...'+regular_choice.__name__ + '()')
     text = update.message.text
     context.user_data['choice'] = text
 
@@ -104,6 +102,7 @@ def regular_choice(update: Update, context: CallbackContext) -> int:
 
 
 def custom_choice(update: Update, context: CallbackContext) -> int:
+    print('...'+custom_choice.__name__ + '()')
     update.message.reply_text(
             'Alright, please send me the category first, ' 'for example "Most impressive skill"'
             )
@@ -112,6 +111,7 @@ def custom_choice(update: Update, context: CallbackContext) -> int:
 
 
 def received_information(update: Update, context: CallbackContext) -> int:
+    print('...'+received_information.__name__ + '()')
     user_data = context.user_data
     text = update.message.text
     category = user_data['choice']
@@ -129,6 +129,7 @@ def received_information(update: Update, context: CallbackContext) -> int:
 
 
 def done(update: Update, context: CallbackContext) -> int:
+    print('...'+done.__name__ + '()')
     user_data = context.user_data
     if 'choice' in user_data:
         del user_data['choice']
@@ -145,11 +146,12 @@ def done(update: Update, context: CallbackContext) -> int:
 # endregion
 
 # region DB methods
-def save_message_to_db(update: Update, context: CallbackContext, ):
+def save_message_to_db(update: Update, context: CallbackContext ):
+    print('...'+save_message_to_db.__name__ + '()')
     user = update.message.from_user
-    print(f'-> catch message {update.message.message_id} '
+    print(f'     catch message {update.message.message_id} '
           f'from user {user.id}({user.full_name}):')
-    print('->>' + update.message.text)
+    print('     message: ' + update.message.text)
 
     db = DbWorker(db_name)  # db name created from the file name
 
@@ -166,9 +168,11 @@ def save_message_to_db(update: Update, context: CallbackContext, ):
                    user.id,
                    update.message.to_json()))
     db.close_connection()
+    print('      √ the message saved to db')
 
 
 def initiate_db():
+    print('...'+initiate_db.__name__ + '()')
     db = DbWorker(db_name)
     db.create_user_data_table()
     db.close_connection()
@@ -179,30 +183,30 @@ def initiate_db():
 def main() -> None:
     initiate_db()
     updater = Updater(conversation_3_0_bot_TOKEN)
-
+    done_str = '^Done$'
     dispatcher = updater.dispatcher
     db_save_handler = MessageHandler(Filters.text | Filters.command, save_message_to_db)
     conv_handler = ConversationHandler(
             entry_points=[CommandHandler('start', start)],
             states={
                 CHOOSING: [
-                    MessageHandler(Filters.regex('^(Age|Favourite colour|Number of siblings)$'),
+                    MessageHandler(Filters.regex('^(Age|Gender)$'),
                                    regular_choice),
-                    MessageHandler(Filters.regex('^Something else...$'), custom_choice),
+                    MessageHandler(Filters.regex('^(Show Exp|Show Lvl)$'), custom_choice),
                     ],
                 TYPING_CHOICE: [
-                    MessageHandler(Filters.text & ~(Filters.command | Filters.regex('^Done$')), regular_choice)
+                    MessageHandler(Filters.text & ~(Filters.command | Filters.regex(done_str)), regular_choice)
                     ],
                 TYPING_REPLY: [
-                    MessageHandler(Filters.text & ~(Filters.command | Filters.regex('^Done$')),
-                                   received_information, )
+                    MessageHandler(Filters.text & ~(Filters.command | Filters.regex(done_str)),
+                                   received_information)
                     ],
                 },
             fallbacks=[MessageHandler(Filters.regex('^Done$'), done)],
             )
+    dispatcher.add_handler(conv_handler)
 
     dispatcher.add_handler(db_save_handler)
-    dispatcher.add_handler(conv_handler)
 
     # Start the Bot
     updater.start_polling()
