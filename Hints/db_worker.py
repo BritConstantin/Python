@@ -1,5 +1,6 @@
 import sqlite3
 from random import randint
+
 """
 SqLite supported method:
     TEXT
@@ -9,20 +10,26 @@ SqLite supported method:
     BLOB
 """
 
+
 class DbWorker:
-# todo: Add log level to class
+    # todo: Add log level to class
 
     def __init__(self, db_name):
         self.conn = sqlite3.connect(f'{db_name}.db')
         self.db_name = db_name
+
     def exec(self, command):
         c = self.conn.cursor()
         try:
             c.execute(command)
             self.conn.commit()
         except sqlite3.OperationalError as e:
-            print('Exception in DbWorker.exec()')
-            print(e) # self.create_table.__name__ +
+            print('Exception in DbWorker.exec() :')
+            print('`' + str(e)) # self.create_table.__name__ +
+        except sqlite3.IntegrityError as e:
+            print('Exception in DbWorker.exec() :')
+            print('`' + str(e)) # self.create_table.__name__ +
+
     # done
     def create_table(self, table_name, cols):
         c = self.conn.cursor()
@@ -39,24 +46,7 @@ class DbWorker:
 
 
         except sqlite3.OperationalError as e:
-            print(e) # self.create_table.__name__ +
-
-
-    def create_user_data_table(self):
-        try:
-            # print(">>create_user_data_table")
-            self.exec("""CREATE TABLE IF NOT EXISTS main.user_data ( 
-                        user_id integer not null primary key ,
-                        first_name text, 
-                        last_name text,
-                        age text,
-                        gender text,    
-                        experience text)""")
-            self.conn.commit()
-
-        except sqlite3.OperationalError as e:
-            print(e) # self.create_table.__name__ +
-
+            print(e)  # self.create_table.__name__ +
 
     def drop_table(self, table_name):
         c = self.conn.cursor()
@@ -87,7 +77,6 @@ class DbWorker:
         except sqlite3.OperationalError as e:
             print(self.create_table.__name__)
             print(e)
-
 
     def insert_row(self, table_name, column_names, row):
         c = self.conn.cursor()
@@ -130,6 +119,6 @@ if __name__ == '__main__':
     extracted_data = my_db.get_all_table_rows(table_name)
     print("ed> ")
     for s in extracted_data:
-        print( s)
+        print(s)
 
     my_db.close_connection()
