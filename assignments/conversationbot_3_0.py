@@ -39,6 +39,7 @@ Users Db contains two tables:
 """
 # done: add new table user_data
 # done: add method that will insert data in to user_data table
+# todo: finish the db_keyboard realization(db command handler)
 # todo: add method that would filter all messages by user id
 # todo: add method that would return all users
 # todo: add method that will read data for the user which asked for it
@@ -62,15 +63,12 @@ reply_keyboard = [
     ]
 db_keyboard = [
     ['Show users'],
-    ['Count user commands']
+    ['Count my commands'],
+    ['Count the user commands']
     ]
-"""user_id integer not null primary key ,
-                      first_name text, 
-                      last_name text,
-                      age text,
-                      gender text,    
-                      experience text"""
+
 markup = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True)
+markup_db = ReplyKeyboardMarkup(db_keyboard, one_time_keyboard=True)
 
 
 # endregion
