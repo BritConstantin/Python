@@ -38,8 +38,9 @@ Users Db contains two tables:
     user_data - contain updated data about user(user_id, first_name, last_name, age, gender, experience) 
 """
 # done: add new table user_data
-# todo: add method that would filter all messages by user id
 # done: add method that will insert data in to user_data table
+# todo: add method that would filter all messages by user id
+# todo: add method that would return all users
 # todo: add method that will read data for the user which asked for it
 # todo: add error handling table(save handled exception with stacktrace
 #       and message that affect it
@@ -249,49 +250,48 @@ def main() -> None:
     print('...' + main.__name__ + '()')
     initiate_db()
     updater = Updater(conversation_3_0_bot_TOKEN)
-    done_str = '^Done$'
     dispatcher = updater.dispatcher
-    # db_save_handler = MessageHandler(Filters.text | Filters.command, save_message_to_db)
+
     conv_handler = ConversationHandler(
             entry_points=[CommandHandler('start', start)],
             states={
                 CHOOSING: [
-                    MessageHandler(Filters.regex('^(Age|Gender)$'),
+                    MessageHandler(Filters.regex(f'^({reply_keyboard[0][0]}|{reply_keyboard[0][1]})$'),
                                    regular_choice),
-                    MessageHandler(Filters.regex('^(Show Exp|Show Lvl)$'), custom_choice),
+                    MessageHandler(Filters.regex(f'^({reply_keyboard[1][0]}})$'), custom_choice),
                     ],
                 TYPING_CHOICE: [
-                    MessageHandler(Filters.text & ~(Filters.command | Filters.regex(done_str)), regular_choice)
+                    MessageHandler(Filters.text & ~(Filters.command | Filters.regex(f'^({reply_keyboard[2][0]})$')), regular_choice)
                     ],
                 TYPING_REPLY: [
-                    MessageHandler(Filters.text & ~(Filters.command | Filters.regex(done_str)),
+                    MessageHandler(Filters.text & ~(Filters.command | Filters.regex(f'^({reply_keyboard[2][0]})$')),
                                    received_information)
                     ],
                 },
             fallbacks=[MessageHandler(Filters.regex('^Done$'), done)],
             )
 
-    db_handler = ConversationHandler(
-            entry_points=[CommandHandler('db', start)],
-            states={
-                CHOOSING: [
-                    MessageHandler(Filters.regex('^(Age|Gender)$'),
-                                   regular_choice),
-                    MessageHandler(Filters.regex('^(Show Exp|Show Lvl)$'), custom_choice),
-                    ],
-                TYPING_CHOICE: [
-                    MessageHandler(Filters.text & ~(Filters.command | Filters.regex(done_str)), regular_choice)
-                    ],
-                TYPING_REPLY: [
-                    MessageHandler(Filters.text & ~(Filters.command | Filters.regex(done_str)),
-                                   received_information)
-                    ],
-                },
-            fallbacks=[MessageHandler(Filters.regex('^Done$'), done)],
-            )
+    # db_handler = ConversationHandler(
+    #         entry_points=[CommandHandler('db', start)],
+    #         states={
+    #             CHOOSING: [
+    #                 MessageHandler(Filters.regex('^(Age|Gender)$'),
+    #                                regular_choice),
+    #                 MessageHandler(Filters.regex('^(Show Exp|Show Lvl)$'), custom_choice),
+    #                 ],
+    #             TYPING_CHOICE: [
+    #                 MessageHandler(Filters.text & ~(Filters.command | Filters.regex(done_str)), regular_choice)
+    #                 ],
+    #             TYPING_REPLY: [
+    #                 MessageHandler(Filters.text & ~(Filters.command | Filters.regex(done_str)),
+    #                                received_information)
+    #                 ],
+    #             },
+    #         fallbacks=[MessageHandler(Filters.regex('^Done$'), done)],
+    #         )
+    # dispatcher.add_handler(db_handler)
     dispatcher.add_handler(conv_handler)
 
-    # dispatcher.add_handler(db_save_handler)
 
     # Start the Bot
     updater.start_polling()
