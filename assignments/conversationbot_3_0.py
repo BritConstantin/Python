@@ -162,12 +162,12 @@ def done(update: Update, context: CallbackContext) -> int:
 
 # region DB methods
 def save_message_to_db(update: Update, context: CallbackContext):
-    print('...' + save_message_to_db.__name__ + '()')
-
+    print('...' + save_message_to_db.__name__ + '()', end='->')
+    t = update.message.text
     user = update.message.from_user
-    print(f'     catch message {update.message.message_id} '
-          f'from user {user.id}({user.full_name}):')
-    print('     message: ' + update.message.text)
+    text = t if len(t)<=30 else t[:30]
+    print(f' {update.message.message_id} '
+          f'user {user.full_name}({user.id}):"' + text+'"')
 
     db = DbWorker(db_name)  # db name created from the file name
 
@@ -184,7 +184,7 @@ def save_message_to_db(update: Update, context: CallbackContext):
                    user.id,
                    update.message.to_json()))
     db.close_connection()
-    print('      √ the message saved to db')
+    # print('      √ the message saved to db')
     save_user_to_db(update, context)
 
 
@@ -258,7 +258,7 @@ def main() -> None:
                 CHOOSING: [
                     MessageHandler(Filters.regex(f'^({reply_keyboard[0][0]}|{reply_keyboard[0][1]})$'),
                                    regular_choice),
-                    MessageHandler(Filters.regex(f'^({reply_keyboard[1][0]}})$'), custom_choice),
+                    MessageHandler(Filters.regex(f'^({reply_keyboard[1][0]})$'), custom_choice),
                     ],
                 TYPING_CHOICE: [
                     MessageHandler(Filters.text & ~(Filters.command | Filters.regex(f'^({reply_keyboard[2][0]})$')), regular_choice)
@@ -290,8 +290,13 @@ def main() -> None:
     #         fallbacks=[MessageHandler(Filters.regex('^Done$'), done)],
     #         )
     # dispatcher.add_handler(db_handler)
-    dispatcher.add_handler(conv_handler)
 
+    # the handler would handle all metssages that would not handled by others and save to the DB
+    db_save_handler = MessageHandler(Filters.text | Filters.command, save_message_to_db)
+
+
+    dispatcher.add_handler(conv_handler)
+    dispatcher.add_handler(db_save_handler)
 
     # Start the Bot
     updater.start_polling()
