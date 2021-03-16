@@ -14,19 +14,6 @@ Press Ctrl-C on the command line or send a signal to the process to stop the
 bot.
 """
 import sqlite3
-
-"""
-In version 3_0 I've try to remmebermain context fields to the db of users.
-Users Db contains two tables: 
-    messages - contain all incoming messages(cols: message_id, user_id, message)
-    user_data - contain updated data about user(user_id, first_name, last_name, age, gender, experience) 
-"""
-# done: add new table user_data
-# todo: add method that would filter all messages by user id
-# done: add method that will insert data in to user_data table
-# todo: add method that will read data for the user which asked for it
-# todo: add error handling table(save handled exception with stacktrace
-#       and message that affect it
 import logging
 from pathlib import Path
 from typing import Dict
@@ -44,6 +31,19 @@ from telegram.ext import (
 from Hints.db_worker import DbWorker
 from bot_info import conversation_3_0_bot_TOKEN
 
+"""
+In version 3_0 I've try to remmebermain context fields to the db of users.
+Users Db contains two tables: 
+    messages - contain all incoming messages(cols: message_id, user_id, message)
+    user_data - contain updated data about user(user_id, first_name, last_name, age, gender, experience) 
+"""
+# done: add new table user_data
+# todo: add method that would filter all messages by user id
+# done: add method that will insert data in to user_data table
+# todo: add method that will read data for the user which asked for it
+# todo: add error handling table(save handled exception with stacktrace
+#       and message that affect it
+
 # region Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -56,8 +56,12 @@ user_data_table = 'main.user_data'
 CHOOSING, TYPING_REPLY, TYPING_CHOICE = range(3)
 reply_keyboard = [
     ['Age', 'Gender'],
-    ['Show Exp', 'Show Lvl'],
+    ['Show Exp'],
     ['Exit']
+    ]
+db_keyboard = [
+    ['Show users'],
+    ['Count user commands']
     ]
 """user_id integer not null primary key ,
                       first_name text, 
@@ -182,6 +186,7 @@ def save_message_to_db(update: Update, context: CallbackContext):
     print('      √ the message saved to db')
     save_user_to_db(update, context)
 
+
 def initiate_db():
     print('...' + initiate_db.__name__ + '()')
     db = DbWorker(db_name)
@@ -216,12 +221,12 @@ def save_user_to_db(update: Update, context: CallbackContext):
     user_id = user.id
     first_name = user.first_name
     last_name = user.last_name
-    age = context.user_data['Age'] if 'Age' in context.user_data.keys() else 'NULL'
-    gender = context.user_data['Gender'] if 'Gender' in context.user_data.keys() else 'NULL'
-    experience = context.user_data['Show Exp'] if 'Show Exp' in context.user_data.keys() else 'NULL'
-    ['Age', 'Gender'],
-    ['Show Exp', 'Show Lvl'],
-    ['Exit']
+    age = context.user_data[reply_keyboard[0][0]] \
+        if reply_keyboard[0][1] in context.user_data.keys() else 'NULL'
+    gender = context.user_data[reply_keyboard[0][1]] \
+        if reply_keyboard[0][1] in context.user_data.keys() else 'NULL'
+    experience = context.user_data[reply_keyboard[1][0]] \
+        if reply_keyboard[1][0] in context.user_data.keys() else 'NULL'
     # todo: try parse user data from context
     exec_command = f""" INSERT or REPLACE INTO {user_data_table} 
                  VALUES ( {user_id},
@@ -231,12 +236,13 @@ def save_user_to_db(update: Update, context: CallbackContext):
                          '{gender}',
                          '{experience}'
             )"""
-    print("-> going to execute next command: ")
-    print('     ' + exec_command)
+    # print("-> going to execute next command: ")
+    # print('     ' + exec_command)
     db.exec(exec_command)
     db.close_connection()
 
-
+def get_users_list(update: Update, context: CallbackContext):
+    pass
 # endregion
 
 def main() -> None:
@@ -248,6 +254,25 @@ def main() -> None:
     # db_save_handler = MessageHandler(Filters.text | Filters.command, save_message_to_db)
     conv_handler = ConversationHandler(
             entry_points=[CommandHandler('start', start)],
+            states={
+                CHOOSING: [
+                    MessageHandler(Filters.regex('^(Age|Gender)$'),
+                                   regular_choice),
+                    MessageHandler(Filters.regex('^(Show Exp|Show Lvl)$'), custom_choice),
+                    ],
+                TYPING_CHOICE: [
+                    MessageHandler(Filters.text & ~(Filters.command | Filters.regex(done_str)), regular_choice)
+                    ],
+                TYPING_REPLY: [
+                    MessageHandler(Filters.text & ~(Filters.command | Filters.regex(done_str)),
+                                   received_information)
+                    ],
+                },
+            fallbacks=[MessageHandler(Filters.regex('^Done$'), done)],
+            )
+
+    db_handler = ConversationHandler(
+            entry_points=[CommandHandler('db', start)],
             states={
                 CHOOSING: [
                     MessageHandler(Filters.regex('^(Age|Gender)$'),
