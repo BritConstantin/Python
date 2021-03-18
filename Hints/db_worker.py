@@ -30,6 +30,18 @@ class DbWorker:
             print('Exception in DbWorker.exec() :')
             print('`' + str(e)) # self.create_table.__name__ +
 
+    def extract_data(self, command):
+        c = self.conn.cursor()
+        try:
+            c.execute(command)
+            data = c.fetchall()
+            return data
+        except sqlite3.OperationalError as e:
+            print('Exception in DbWorker.exec() :')
+            print('`' + str(e)) # self.create_table.__name__ +
+        except sqlite3.IntegrityError as e:
+            print('Exception in DbWorker.exec() :')
+            print('`' + str(e)) # self.create_table.__name__ +
     # done
     def create_table(self, table_name, cols):
         c = self.conn.cursor()

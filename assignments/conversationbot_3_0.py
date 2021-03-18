@@ -57,7 +57,7 @@ db_name = Path(__file__).name[:-3]
 user_data_table = 'main.user_data'
 
 CHOOSING, TYPING_REPLY, TYPING_CHOICE = range(3)
-SELECTING, TYPING_COMMAND = range(3, 5)
+SELECTING, SELECTING_USER, TYPING_COMMAND = range(3, 6)
 reply_keyboard = [
     ['Age', 'Gender'],
     ['Number'],  # todo: check how to get user number
@@ -292,6 +292,18 @@ def count_my_commands(update: Update, context: CallbackContext):
     print('...' + count_my_commands.__name__ + '()')
     save_message_to_db(update, context)
     print(context.user_data)
+    db = DbWorker(db_name)
+    data =db.extract_data(
+        f"""SELECT count(*) from messages WHERE user_id = {update.message.from_user.id}""")
+    message_counter = 1
+    if type(data)=='str':
+        bot_update = Update(update_id=update.update_id + message_counter, message=data)
+    else:
+        for s in data:
+            reply = update.message.reply_text(s)
+            bot_update = Update(update_id=update.update_id + message_counter, message=reply)
+            message_counter = +1
+            save_message_to_db(bot_update, context)
 
     return SELECTING
 
@@ -308,7 +320,7 @@ def use_custom_select(update: Update, context: CallbackContext):
     save_message_to_db(update, context)
     print(context.user_data)
 
-    return SELECTING
+    return TYPING_COMMAND
 
 
 def close_connection(update: Update, context: CallbackContext):
@@ -358,13 +370,20 @@ def main() -> None:
             entry_points=[CommandHandler('db', db_start)],
             states={
                 SELECTING: [
-                    MessageHandler(Filters.regex(f'^(Show users)$'), show_users),
-                    MessageHandler(Filters.regex(f'^({db_keyboard[1]})$'), count_my_commands),
-                    MessageHandler(Filters.regex(f'^({db_keyboard[2]})$'), count_the_user_commands),
-                    MessageHandler(Filters.regex(f'^({db_keyboard[3]})$'), use_custom_select)
+                    MessageHandler(Filters.regex(f'^({db_keyboard[0][0]})$'), show_users),
+                    MessageHandler(Filters.regex(f'^({db_keyboard[1][0]})$'), count_my_commands),
+                    MessageHandler(Filters.regex(f'^({db_keyboard[2][0]})$'), count_the_user_commands),
+                    MessageHandler(Filters.regex(f'^({db_keyboard[3][0]})$'), use_custom_select)
                     ],
+                SELECTING_USER:[
+                    MessageHandler(Filters.regex(f'^({db_keyboard[3][0]})$'), use_custom_select)
+                ],
                 TYPING_COMMAND: [
-                    MessageHandler(Filters.text & ~Filters.command, execute_custom_command)
+                    MessageHandler(
+                        Filters.text & ~
+                        (Filters.command |
+                         Filters.regex(f'^({db_keyboard[4][0]})$')),
+                        execute_custom_command)
                     ],
                 # TYPING_REPLY: [
                 #     MessageHandler(Filters.text & ~(Filters.command | Filters.regex(done_str)),
