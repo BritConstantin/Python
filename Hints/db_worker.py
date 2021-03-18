@@ -75,7 +75,9 @@ class DbWorker:
         try:
             with self.conn:
                 c.execute(f"SELECT * FROM {table_name}")
-                return c.fetchall()
+                tmp =  c.fetchall()
+                print(tmp)
+                return tmp
 
         except sqlite3.OperationalError as e:
             print(self.create_table.__name__)
