@@ -234,7 +234,6 @@ def save_user_to_db(update: Update, context: CallbackContext):
         if reply_keyboard[0][1] in context.user_data.keys() else 'NULL'
     experience = context.user_data[reply_keyboard[1][0]] \
         if reply_keyboard[1][0] in context.user_data.keys() else 'NULL'
-    # todo: try parse user data from context
     exec_command = f""" INSERT or REPLACE INTO {user_data_table} 
                  VALUES ( {user_id},
                          '{first_name}',
@@ -246,12 +245,6 @@ def save_user_to_db(update: Update, context: CallbackContext):
 
     db.exec(exec_command)
     db.close_connection()
-
-
-def get_users_list(update: Update, context: CallbackContext):
-    print('...' + db_start.__name__ + '()')
-    save_message_to_db(update, context)
-    print(context.user_data)
 
 
 # endregion
@@ -266,7 +259,7 @@ def db_start(update: Update, context: CallbackContext):
             "Hi! \n You enter in DB mode",
             reply_markup=markup_db,
             )
-    # FIXME: save reply messages to db also
+
     bot_update = Update(update_id=update.update_id + 1, message=reply)
     save_message_to_db(bot_update, context)
     return SELECTING
@@ -276,6 +269,21 @@ def show_users(update: Update, context: CallbackContext):
     print('...' + show_users.__name__ + '()')
     save_message_to_db(update, context)
     print(context.user_data)
+    db = DbWorker(db_name)
+    users = db.get_all_table_rows(user_data_table)
+
+    message_counter = 1
+    for s in users:
+        reply = update.message.reply_text(f'{s[0]} {s[2]} {s[1]}')
+        bot_update = Update(update_id=update.update_id + message_counter, message=reply)
+        message_counter = +1
+        save_message_to_db(bot_update, context)
+
+    reply2 = reply.reply_text("That is all users", reply_markup=markup_db)
+    bot_update = Update(update_id=update.update_id + message_counter, message=reply2)
+    save_message_to_db(bot_update, context)
+
+    return SELECTING
 
 
 def count_my_commands(update: Update, context: CallbackContext):
@@ -340,7 +348,7 @@ def main() -> None:
             entry_points=[CommandHandler('db', db_start)],
             states={
                 SELECTING: [
-                    MessageHandler(Filters.regex(f'^({db_keyboard[0]})$'), show_users),
+                    MessageHandler(Filters.regex(f'^(Show users)$'), show_users),
                     MessageHandler(Filters.regex(f'^({db_keyboard[1]})$'), count_my_commands),
                     MessageHandler(Filters.regex(f'^({db_keyboard[2]})$'), count_the_user_commands),
                     MessageHandler(Filters.regex(f'^({db_keyboard[3]})$'), use_custom_select)

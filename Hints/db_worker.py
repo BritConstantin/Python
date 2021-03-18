@@ -68,12 +68,15 @@ class DbWorker:
             print(e)
 
     def get_all_table_rows(self, table_name):
+
+        print('...' + self.get_all_table_rows.__name__ + '()')
         c = self.conn.cursor()
 
         try:
             with self.conn:
                 c.execute(f"SELECT * FROM {table_name}")
-            return c.fetchall()
+                return c.fetchall()
+
         except sqlite3.OperationalError as e:
             print(self.create_table.__name__)
             print(e)
