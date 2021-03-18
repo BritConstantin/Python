@@ -40,6 +40,7 @@ Users Db contains two tables:
 # done: add new table user_data
 # done: add method that will insert data in to user_data table
 # todo: finish the db_keyboard realization(db command handler)
+
 # todo: add method that would filter all messages by user id
 # todo: add method that would return all users
 # todo: add method that will read data for the user which asked for it
@@ -56,15 +57,18 @@ db_name = Path(__file__).name[:-3]
 user_data_table = 'main.user_data'
 
 CHOOSING, TYPING_REPLY, TYPING_CHOICE = range(3)
+SELECTING, TYPING_COMMAND = range(3, 5)
 reply_keyboard = [
     ['Age', 'Gender'],
-    ['Show Exp'],
+    ['Number'],  # todo: check how to get user number
     ['Exit']
     ]
 db_keyboard = [
     ['Show users'],
     ['Count my commands'],
-    ['Count the user commands']
+    ['Count the user commands'],
+    ['Use custom SELECT'],
+    ['Close connection']
     ]
 
 markup = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True)
@@ -86,14 +90,15 @@ def facts_to_str(user_data: Dict[str, str]) -> str:
 # region     Handlers
 def start(update: Update, context: CallbackContext) -> int:
     print('...' + start.__name__ + '()')
-    print(context.user_data)
     save_message_to_db(update, context)
 
-    update.message.reply_text(
+    reply = update.message.reply_text(
             "Hi! My name is Doctor Botter. I will hold a more complex conversation with you. "
             "Why don't you tell me something about yourself?",
             reply_markup=markup,
             )
+    bot_update = Update(update_id=update.update_id + 1, message=reply)
+    save_message_to_db(bot_update, context)
 
     return CHOOSING
 
@@ -105,8 +110,9 @@ def regular_choice(update: Update, context: CallbackContext) -> int:
     context.user_data['choice'] = text
     print(context.user_data)
 
-    update.message.reply_text(f'Your {text.lower()}? Yes, I would love to hear about that!')
-
+    reply = update.message.reply_text(f'Your {text.lower()}? Yes, I would love to hear about that!')
+    bot_update = Update(update_id=update.update_id + 1, message=reply)
+    save_message_to_db(bot_update, context)
     return TYPING_REPLY
 
 
@@ -114,10 +120,11 @@ def custom_choice(update: Update, context: CallbackContext) -> int:
     print('...' + custom_choice.__name__ + '()')
     print(context.user_data)
     save_message_to_db(update, context)
-    update.message.reply_text(
+    reply = update.message.reply_text(
             'Alright, please send me the category first, ' 'for example "Most impressive skill"'
             )
-
+    bot_update = Update(update_id=update.update_id + 1, message=reply)
+    save_message_to_db(bot_update, context)
     return TYPING_CHOICE
 
 
@@ -130,13 +137,14 @@ def received_information(update: Update, context: CallbackContext) -> int:
     del user_data['choice']
     print(context.user_data)
     save_message_to_db(update, context)
-    update.message.reply_text(
+    reply = update.message.reply_text(
             "Neat! Just so you know, this is what you already told me:"
             f"{facts_to_str(user_data)} You can tell me more, or change your opinion"
             " on something.",
             reply_markup=markup,
             )
-
+    bot_update = Update(update_id=update.update_id + 1, message=reply)
+    save_message_to_db(bot_update, context)
     return CHOOSING
 
 
@@ -147,11 +155,11 @@ def done(update: Update, context: CallbackContext) -> int:
     if 'choice' in user_data:
         del user_data['choice']
 
-    update.message.reply_text(
+    reply = update.message.reply_text(
             f"I learned these facts about you: {facts_to_str(user_data)} Until next time!"
             )
-    update.message.reply_text(str(user_data))
-    print(context)
+    bot_update = Update(update_id=update.update_id + 1, message=reply)
+    save_message_to_db(bot_update, context)
     user_data.clear()
     return ConversationHandler.END
 
@@ -163,9 +171,9 @@ def save_message_to_db(update: Update, context: CallbackContext):
     print('...' + save_message_to_db.__name__ + '()', end='->')
     t = update.message.text
     user = update.message.from_user
-    text = t if len(t)<=30 else t[:30]
+    text = t if len(t) <= 30 else t[:30]
     print(f' {update.message.message_id} '
-          f'user {user.full_name}({user.id}):"' + text+'"')
+          f'user {user.full_name}({user.id}):"' + text + '"')
 
     db = DbWorker(db_name)  # db name created from the file name
 
@@ -235,13 +243,71 @@ def save_user_to_db(update: Update, context: CallbackContext):
                          '{gender}',
                          '{experience}'
             )"""
-    # print("-> going to execute next command: ")
-    # print('     ' + exec_command)
+
     db.exec(exec_command)
     db.close_connection()
 
+
 def get_users_list(update: Update, context: CallbackContext):
-    pass
+    print('...' + db_start.__name__ + '()')
+    save_message_to_db(update, context)
+    print(context.user_data)
+
+
+# endregion
+
+# region markup_db handlers
+
+def db_start(update: Update, context: CallbackContext):
+    print('...' + db_start.__name__ + '()')
+    save_message_to_db(update, context)
+    print(context.user_data)
+    reply = update.message.reply_text(
+            "Hi! \n You enter in DB mode",
+            reply_markup=markup_db,
+            )
+    # FIXME: save reply messages to db also
+    bot_update = Update(update_id=update.update_id + 1, message=reply)
+    save_message_to_db(bot_update, context)
+    return SELECTING
+
+
+def show_users(update: Update, context: CallbackContext):
+    print('...' + show_users.__name__ + '()')
+    save_message_to_db(update, context)
+    print(context.user_data)
+
+
+def count_my_commands(update: Update, context: CallbackContext):
+    print('...' + count_my_commands.__name__ + '()')
+    save_message_to_db(update, context)
+    print(context.user_data)
+
+
+def count_the_user_commands(update: Update, context: CallbackContext):
+    print('...' + count_the_user_commands.__name__ + '()')
+    save_message_to_db(update, context)
+    print(context.user_data)
+
+
+def use_custom_select(update: Update, context: CallbackContext):
+    print('...' + use_custom_select.__name__ + '()')
+    save_message_to_db(update, context)
+    print(context.user_data)
+
+
+def close_connection(update: Update, context: CallbackContext):
+    print('...' + close_connection.__name__ + '()')
+    save_message_to_db(update, context)
+    print(context.user_data)
+
+
+def execute_custom_command(update: Update, context: CallbackContext):
+    print('...' + execute_custom_command.__name__ + '()')
+    save_message_to_db(update, context)
+    print(context.user_data)
+
+
 # endregion
 
 def main() -> None:
@@ -259,7 +325,8 @@ def main() -> None:
                     MessageHandler(Filters.regex(f'^({reply_keyboard[1][0]})$'), custom_choice),
                     ],
                 TYPING_CHOICE: [
-                    MessageHandler(Filters.text & ~(Filters.command | Filters.regex(f'^({reply_keyboard[2][0]})$')), regular_choice)
+                    MessageHandler(Filters.text & ~(Filters.command | Filters.regex(f'^({reply_keyboard[2][0]})$')),
+                                   regular_choice)
                     ],
                 TYPING_REPLY: [
                     MessageHandler(Filters.text & ~(Filters.command | Filters.regex(f'^({reply_keyboard[2][0]})$')),
@@ -269,29 +336,30 @@ def main() -> None:
             fallbacks=[MessageHandler(Filters.regex('^Done$'), done)],
             )
 
-    # db_handler = ConversationHandler(
-    #         entry_points=[CommandHandler('db', start)],
-    #         states={
-    #             CHOOSING: [
-    #                 MessageHandler(Filters.regex('^(Age|Gender)$'),
-    #                                regular_choice),
-    #                 MessageHandler(Filters.regex('^(Show Exp|Show Lvl)$'), custom_choice),
-    #                 ],
-    #             TYPING_CHOICE: [
-    #                 MessageHandler(Filters.text & ~(Filters.command | Filters.regex(done_str)), regular_choice)
-    #                 ],
-    #             TYPING_REPLY: [
-    #                 MessageHandler(Filters.text & ~(Filters.command | Filters.regex(done_str)),
-    #                                received_information)
-    #                 ],
-    #             },
-    #         fallbacks=[MessageHandler(Filters.regex('^Done$'), done)],
-    #         )
-    # dispatcher.add_handler(db_handler)
+    db_handler = ConversationHandler(
+            entry_points=[CommandHandler('db', db_start)],
+            states={
+                SELECTING: [
+                    MessageHandler(Filters.regex(f'^({db_keyboard[0]})$'), show_users),
+                    MessageHandler(Filters.regex(f'^({db_keyboard[1]})$'), count_my_commands),
+                    MessageHandler(Filters.regex(f'^({db_keyboard[2]})$'), count_the_user_commands),
+                    MessageHandler(Filters.regex(f'^({db_keyboard[3]})$'), use_custom_select)
+                    ],
+                TYPING_COMMAND: [
+                    MessageHandler(Filters.text & ~Filters.command, execute_custom_command)
+                    ],
+                # TYPING_REPLY: [
+                #     MessageHandler(Filters.text & ~(Filters.command | Filters.regex(done_str)),
+                #                    received_information)
+                #     ],
+                },
+            fallbacks=[
+                MessageHandler(Filters.regex(f'^({db_keyboard[4]})$'), close_connection)],
+            )
+    dispatcher.add_handler(db_handler)
 
     # the handler would handle all metssages that would not handled by others and save to the DB
     db_save_handler = MessageHandler(Filters.text | Filters.command, save_message_to_db)
-
 
     dispatcher.add_handler(conv_handler)
     dispatcher.add_handler(db_save_handler)
