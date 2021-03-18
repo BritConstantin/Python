@@ -39,10 +39,10 @@ Users Db contains two tables:
 """
 # done: add new table user_data
 # done: add method that will insert data in to user_data table
+# done: add method that would return all users
 # todo: finish the db_keyboard realization(db command handler)
 
-# todo: add method that would filter all messages by user id
-# todo: add method that would return all users
+# todo: add method that would filter all messages by user id, and count
 # todo: add method that will read data for the user which asked for it
 # todo: add error handling table(save handled exception with stacktrace
 #       and message that affect it
@@ -274,7 +274,7 @@ def show_users(update: Update, context: CallbackContext):
 
     message_counter = 1
     for s in users:
-        reply = update.message.reply_text(f'{s[0]} {s[2]} {s[1]}')
+        reply = update.message.reply_text(f'{users.index(s)}|{s[2]} {s[1]}|{s[0]}')
         bot_update = Update(update_id=update.update_id + message_counter, message=reply)
         message_counter = +1
         save_message_to_db(bot_update, context)
