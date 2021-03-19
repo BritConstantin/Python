@@ -46,6 +46,11 @@ Users Db contains two tables:
 # todo: add method that will read data for the user which asked for it
 # todo: add error handling table(save handled exception with stacktrace
 #       and message that affect it
+# todo: study how to use logger correct
+#          logger.info(
+#         "Location of %s: %f / %f", user.first_name, user_location.latitude, user_location.longitude
+#     )
+# todo: learn how to work with pickling
 
 # region Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
