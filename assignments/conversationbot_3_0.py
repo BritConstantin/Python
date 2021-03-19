@@ -18,7 +18,7 @@ import logging
 from pathlib import Path
 from typing import Dict
 
-from telegram import ReplyKeyboardMarkup, Update
+from telegram import ReplyKeyboardMarkup, Update, KeyboardButton
 from telegram.ext import (
     Updater,
     CommandHandler,
@@ -26,6 +26,7 @@ from telegram.ext import (
     Filters,
     ConversationHandler,
     CallbackContext,
+
     )
 
 from Hints.db_worker import DbWorker
@@ -41,7 +42,7 @@ Users Db contains two tables:
 # done: add method that will insert data in to user_data table
 # done: add method that would return all users
 # todo: finish the db_keyboard realization(db command handler)
-
+# todo: check how to get user number
 # todo: add method that would filter all messages by user id, and count
 # todo: add method that will read data for the user which asked for it
 # todo: add error handling table(save handled exception with stacktrace
@@ -64,9 +65,9 @@ user_data_table = 'main.user_data'
 CHOOSING, TYPING_REPLY, TYPING_CHOICE = range(3)
 SELECTING, SELECTING_USER, TYPING_COMMAND = range(3, 6)
 reply_keyboard = [
-    ['Age', 'Gender'],
-    ['Number'],  # todo: check how to get user number
-    ['Exit']
+    [KeyboardButton('Age'), KeyboardButton('Gender')],
+    [KeyboardButton('Number',request_contact=True)],  # todo: check how to get user number
+    [KeyboardButton('Exit')]
     ]
 db_keyboard = [
     ['Show users'],
@@ -76,7 +77,7 @@ db_keyboard = [
     ['Close connection']
     ]
 
-markup = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=True)
+markup = ReplyKeyboardMarkup(keyboard=reply_keyboard, one_time_keyboard=True,)
 markup_db = ReplyKeyboardMarkup(db_keyboard, one_time_keyboard=True)
 
 
@@ -96,14 +97,15 @@ def facts_to_str(user_data: Dict[str, str]) -> str:
 def start(update: Update, context: CallbackContext) -> int:
     print('...' + start.__name__ + '()')
     save_message_to_db(update, context)
+    print( 'contact'in update.message.to_dict().keys())
 
     reply = update.message.reply_text(
             "Hi! My name is Doctor Botter. I will hold a more complex conversation with you. "
             "Why don't you tell me something about yourself?",
-            reply_markup=markup,
+            reply_markup=markup
             )
     bot_update = Update(update_id=update.update_id + 1, message=reply)
-    save_message_to_db(bot_update, context)
+    # save_message_to_db(bot_update, context)
 
     return CHOOSING
 
@@ -167,7 +169,15 @@ def done(update: Update, context: CallbackContext) -> int:
     save_message_to_db(bot_update, context)
     user_data.clear()
     return ConversationHandler.END
-
+def save_pasport_data(update: Update, context: CallbackContext):
+    print('...' + save_pasport_data.__name__ + '()')
+    # save_message_to_db(update, context)
+    print(update.message)
+    print(update.message.contact)
+    print( 'contact'in update.message.to_dict().keys())
+    # for s in update.message.to_dict().keys():
+    #     print(s)
+    return SELECTING
 
 # endregion
 
@@ -237,8 +247,7 @@ def save_user_to_db(update: Update, context: CallbackContext):
         if reply_keyboard[0][1] in context.user_data.keys() else 'NULL'
     gender = context.user_data[reply_keyboard[0][1]] \
         if reply_keyboard[0][1] in context.user_data.keys() else 'NULL'
-    experience = context.user_data[reply_keyboard[1][0]] \
-        if reply_keyboard[1][0] in context.user_data.keys() else 'NULL'
+    experience = 'NULL'#context.user_data[reply_keyboard[1][0]] \# if reply_keyboard[1][0] in context.user_data.keys() else 'NULL'
     exec_command = f""" INSERT or REPLACE INTO {user_data_table} 
                  VALUES ( {user_id},
                          '{first_name}',
@@ -358,6 +367,8 @@ def main() -> None:
                     MessageHandler(Filters.regex(f'^({reply_keyboard[0][0]}|{reply_keyboard[0][1]})$'),
                                    regular_choice),
                     MessageHandler(Filters.regex(f'^({reply_keyboard[1][0]})$'), custom_choice),
+
+                    MessageHandler(Filters.contact, save_pasport_data),
                     ],
                 TYPING_CHOICE: [
                     MessageHandler(Filters.text & ~(Filters.command | Filters.regex(f'^({reply_keyboard[2][0]})$')),
