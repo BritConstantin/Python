@@ -25,10 +25,10 @@ class DbWorker:
             self.conn.commit()
         except sqlite3.OperationalError as e:
             print('Exception in DbWorker.exec() :')
-            print('`' + str(e)) # self.create_table.__name__ +
+            print('`' + str(e))  # self.create_table.__name__ +
         except sqlite3.IntegrityError as e:
             print('Exception in DbWorker.exec() :')
-            print('`' + str(e)) # self.create_table.__name__ +
+            print('`' + str(e))  # self.create_table.__name__ +
 
     def extract_data(self, command):
         c = self.conn.cursor()
@@ -38,10 +38,11 @@ class DbWorker:
             return data
         except sqlite3.OperationalError as e:
             print('Exception in DbWorker.exec() :')
-            print('`' + str(e)) # self.create_table.__name__ +
+            print('`' + str(e))  # self.create_table.__name__ +
         except sqlite3.IntegrityError as e:
             print('Exception in DbWorker.exec() :')
-            print('`' + str(e)) # self.create_table.__name__ +
+            print('`' + str(e))  # self.create_table.__name__ +
+
     # done
     def create_table(self, table_name, cols):
         c = self.conn.cursor()
@@ -59,6 +60,16 @@ class DbWorker:
 
         except sqlite3.OperationalError as e:
             print(e)  # self.create_table.__name__ +
+
+    def alter_table(self, table: str,
+                    new_col_name: str,
+                    new_coll_type: str):
+        c = self.conn.cursor()
+        command = f"""ALTER TABLE{table}
+                      ADD COLUMN {new_col_name} {new_coll_type};"""
+        c.execute(command)
+        self.conn.commit()
+        self.close_connection()
 
     def drop_table(self, table_name):
         c = self.conn.cursor()
@@ -87,7 +98,7 @@ class DbWorker:
         try:
             with self.conn:
                 c.execute(f"SELECT * FROM {table_name}")
-                tmp =  c.fetchall()
+                tmp = c.fetchall()
                 print(tmp)
                 return tmp
 
@@ -120,22 +131,35 @@ class DbWorker:
 if __name__ == '__main__':
     db_name = "users2"
     table_name = 'users'
+    user_data_table_name = 'user_data'
+    user_data_cols = {
+        'user_id': 'integer not null primary key',
+        'first_name': 'text',
+        'last_name': 'text',
+        'age': 'text',
+        'gender': 'text',
+        'experience': 'text',
+        'phone_number':'text'
+    }
     users_hat = {
         'message_id': 'integer',
         'user_id': 'integer',
         'message': 'string'
-        }
+    }
     test_row = (randint(1, 1000), "stub_name" + str(randint(1, 1000)), "stub message" + str(randint(1, 1000)))
-    my_db = DbWorker(db_name)
+    db = DbWorker(db_name)
+
     # my_db.drop_table(db_name)
     # my_db.create_table(table_name, users_hat)
     # my_db.print_table(table_name)
     # print('----------------------')
-    my_db.insert_row(table_name, users_hat.keys(), test_row)
-    my_db.print_table(table_name)
-    extracted_data = my_db.get_all_table_rows(table_name)
+    # my_db.insert_row(table_name, users_hat.keys(), test_row)
+    # my_db.print_table(table_name)
+    # db.alter(table_name, user_data_cols.keys()[-2], user_data_cols.values()[-2])
+    # db.alter_table(table_name, user_data_cols['experience'], user_data_cols.values()[-1])
+    extracted_data = db.get_all_table_rows(table_name)
     print("ed> ")
     for s in extracted_data:
         print(s)
 
-    my_db.close_connection()
+    db.close_connection()
