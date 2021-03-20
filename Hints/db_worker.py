@@ -13,14 +13,17 @@ SqLite supported method:
 
 class DbWorker:
     # todo: Add log level to class
-
-    def __init__(self, db_name):
+    # todo: add normal exception handling to all methods
+    def __init__(self, db_name, loglevel = 0):
         self.conn = sqlite3.connect(f'{db_name}.db')
         self.db_name = db_name
+        self.loglevel = loglevel
 
     def exec(self, command):
         c = self.conn.cursor()
         try:
+            if self.loglevel>0:
+                print("->> trying to execute the command:\n" + command)
             c.execute(command)
             self.conn.commit()
         except sqlite3.OperationalError as e:
@@ -33,14 +36,16 @@ class DbWorker:
     def extract_data(self, command):
         c = self.conn.cursor()
         try:
+            if self.loglevel>0:
+                print("->> trying to execute the command:\n" + command)
             c.execute(command)
             data = c.fetchall()
             return data
         except sqlite3.OperationalError as e:
-            print('Exception in DbWorker.exec() :')
+            print('Exception in DbWorker.extract_data() :')
             print('`' + str(e))  # self.create_table.__name__ +
         except sqlite3.IntegrityError as e:
-            print('Exception in DbWorker.exec() :')
+            print('Exception in DbWorker.extract_data() :')
             print('`' + str(e))  # self.create_table.__name__ +
 
     # done
@@ -65,11 +70,15 @@ class DbWorker:
                     new_col_name: str,
                     new_coll_type: str):
         c = self.conn.cursor()
-        command = f"""ALTER TABLE{table}
+        try:
+            command = f"""ALTER TABLE {table}
                       ADD COLUMN {new_col_name} {new_coll_type};"""
-        c.execute(command)
-        self.conn.commit()
-        self.close_connection()
+            c.execute(command)
+            self.conn.commit()
+        except sqlite3.OperationalError as e:
+            print(self.create_table.__name__)
+            print(e)
+
 
     def drop_table(self, table_name):
         c = self.conn.cursor()
@@ -87,11 +96,10 @@ class DbWorker:
             for s in c.fetchall():
                 print(s)
         except sqlite3.OperationalError as e:
-            print(self.create_table.__name__)
+            print("ERROR in " + self.create_table.__name__)
             print(e)
 
     def get_all_table_rows(self, table_name):
-
         print('...' + self.get_all_table_rows.__name__ + '()')
         c = self.conn.cursor()
 
@@ -103,10 +111,10 @@ class DbWorker:
                 return tmp
 
         except sqlite3.OperationalError as e:
-            print(self.create_table.__name__)
+            print("ERROR in " + self.create_table.__name__)
             print(e)
 
-    def insert_row(self, table_name, column_names, row):
+    def save_message(self, table_name, column_names, row):
         c = self.conn.cursor()
         try:
             # c.execute(f"""
@@ -122,44 +130,8 @@ class DbWorker:
             self.conn.commit()
 
         except sqlite3.OperationalError as e:
+            print(self.save_message.__name__)
             print(e)  # self.create_table.__name__ +
 
     def close_connection(self):
         self.conn.close()  # close the connection to the DB
-
-
-if __name__ == '__main__':
-    db_name = "users2"
-    table_name = 'users'
-    user_data_table_name = 'user_data'
-    user_data_cols = {
-        'user_id': 'integer not null primary key',
-        'first_name': 'text',
-        'last_name': 'text',
-        'age': 'text',
-        'gender': 'text',
-        'experience': 'text',
-        'phone_number':'text'
-    }
-    users_hat = {
-        'message_id': 'integer',
-        'user_id': 'integer',
-        'message': 'string'
-    }
-    test_row = (randint(1, 1000), "stub_name" + str(randint(1, 1000)), "stub message" + str(randint(1, 1000)))
-    db = DbWorker(db_name)
-
-    # my_db.drop_table(db_name)
-    # my_db.create_table(table_name, users_hat)
-    # my_db.print_table(table_name)
-    # print('----------------------')
-    # my_db.insert_row(table_name, users_hat.keys(), test_row)
-    # my_db.print_table(table_name)
-    # db.alter(table_name, user_data_cols.keys()[-2], user_data_cols.values()[-2])
-    # db.alter_table(table_name, user_data_cols['experience'], user_data_cols.values()[-1])
-    extracted_data = db.get_all_table_rows(table_name)
-    print("ed> ")
-    for s in extracted_data:
-        print(s)
-
-    db.close_connection()
