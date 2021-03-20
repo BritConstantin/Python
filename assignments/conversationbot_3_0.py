@@ -77,7 +77,7 @@ def start(update: Update, context: CallbackContext) -> int:
 
     reply = update.message.reply_text(
         "Hi! My name is Doctor Botter. I will hold a more complex conversation with you. "
-        "Why dont you tell me something about yourself?",
+        "Why don't you tell me something about yourself?",
         reply_markup=markup
     )
     bot_update = Update(update_id=update.update_id + 1, message=reply)
@@ -164,6 +164,15 @@ def save_contact(update: Update, context: CallbackContext):
         update.message.reply_text("It's sad, but you decide not to give me your contacts")
     return CHOOSING
 
+def save_contact2(update: Update, context: CallbackContext):
+    print('...' + save_contact2.__name__ + '()')
+    save_message_to_db(update, context)
+    if 'phone_number' in update.message:
+        update.message.reply_text("Thank you for trust")
+    else:
+        update.message.reply_text("It's sad, but you decide not to give me your contacts")
+    return CHOOSING
+
 
 # endregion
 
@@ -183,7 +192,7 @@ def save_message_to_db(update: Update, context: CallbackContext):
 
 
     db.create_table(messages_table_name, user_data_table_format)
-    db.save_message(messages_table_name, user_data_table_format.keys(),
+    db.save_message(messages_table_name,
                     (update.message.message_id,
                    user.id,
                    update.message.to_json()))
@@ -261,6 +270,7 @@ def main() -> None:
                 MessageHandler(Filters.regex(f'^({reply_keyboard[0][0].text}'
                                              f'|{reply_keyboard[0][1].text})$'),regular_choice),
                 MessageHandler(Filters.regex(f'^({reply_keyboard[1][0].text})$'), save_contact),
+                MessageHandler(Filters.contact, save_contact2),
                 MessageHandler(Filters.regex(f'^({reply_keyboard[2][0].text})$'), done)
             ],
             TYPING_CHOICE: [

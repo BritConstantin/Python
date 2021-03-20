@@ -14,7 +14,7 @@ SqLite supported method:
 class DbWorker:
     # todo: Add log level to class
     # todo: add normal exception handling to all methods
-    def __init__(self, db_name, loglevel = 0):
+    def __init__(self, db_name, loglevel=0):
         self.conn = sqlite3.connect(f'{db_name}.db')
         self.db_name = db_name
         self.loglevel = loglevel
@@ -22,7 +22,7 @@ class DbWorker:
     def exec(self, command):
         c = self.conn.cursor()
         try:
-            if self.loglevel>0:
+            if self.loglevel > 0:
                 print("->> trying to execute the command:\n" + command)
             c.execute(command)
             self.conn.commit()
@@ -36,7 +36,7 @@ class DbWorker:
     def extract_data(self, command):
         c = self.conn.cursor()
         try:
-            if self.loglevel>0:
+            if self.loglevel > 0:
                 print("->> trying to execute the command:\n" + command)
             c.execute(command)
             data = c.fetchall()
@@ -79,7 +79,6 @@ class DbWorker:
             print(self.create_table.__name__)
             print(e)
 
-
     def drop_table(self, table_name):
         c = self.conn.cursor()
         sql_command = f"DROP TABLE {table_name}"
@@ -114,16 +113,21 @@ class DbWorker:
             print("ERROR in " + self.create_table.__name__)
             print(e)
 
-    def save_message(self, table_name, column_names, row):
+    def save_message(self, table_name, row):
         c = self.conn.cursor()
         try:
-            # c.execute(f"""
-            # INSERT INTO users
-            # VALUES (1,'test_name','test_message')
-            #             """)
+            # print(f'---------->tpe of row: {type(row)}')
+            for r in range(len(row)):
+                l = list(row)
+                #  print(f'---------->{type(l[r])}  r=  {str(l[r])}')
+                if str(type(l[r])) == "<class 'str'>" and "'" in l[r]:
+                    #     print('-------> We in!')
+
+                    l[r] = str(l[r]).replace("'", "''")
+
             c.execute(f"""
                INSERT INTO {table_name}
-               VALUES ({row[0]},'{row[1]}','{row[2]}')
+               VALUES ({l[0]},'{l[1]}','{l[2]}')
                            """)
             # c.execute(f"""INSERT INTO {table_name}
             #               VALUES ({str(column_names[0])}, {column_names[1]}, {column_names[2]}) """)
