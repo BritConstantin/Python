@@ -39,13 +39,21 @@ logger = logging.getLogger(__name__)
 # endregion
 
 # region Global variables declaration
+# DB vars
 db_name = Path(__file__).name[:-3]
 user_data_table = 'main.user_data'
-
+messages_table_name = 'main.messages'
+user_data_table_format = {
+    'message_id': 'integer',
+    'user_id': 'integer',
+    'message': 'string'
+}
+# Conversation stages
 CHOOSING, TYPING_REPLY, TYPING_CHOICE = range(3)
+# Creating of keyboard markup
 reply_keyboard = [
     [KeyboardButton('Age'), KeyboardButton('Gender')],
-    [KeyboardButton('Number', request_contact=True)],  # todo: check how to get user number
+    [KeyboardButton('Number', request_contact=True)],
     [KeyboardButton('Exit')]
 ]
 markup = ReplyKeyboardMarkup(keyboard=reply_keyboard, one_time_keyboard=True, )
@@ -164,26 +172,18 @@ def save_message_to_db(update: Update, context: CallbackContext):
     print('...' + save_message_to_db.__name__ + '()', end='->')
     user = update.message.from_user
     if 'text' in update.message.to_dict():
-        print('text is in the message')
-        t = update.message.to_json()
-        text = t #if len(t) <= 30 else t[:30]
+        t = update.message.text
+        text = t if len(t) <= 30 else t[:30]
     else:
-        print('-->> ther is no text in the message!!')
         text = update.message.to_json()
     print(f' {update.message.message_id} '
           f'user {user.full_name}({user.id}):"' + text + '"')
 
-    db = DbWorker(db_name)  # db name created from the file name
+    db = DbWorker(db_name)
 
-    table_name = 'messages'
-    users_hat = {
-        'message_id': 'integer',
-        'user_id': 'integer',
-        'message': 'string'
-    }
 
-    db.create_table(table_name, users_hat)
-    db.save_message(table_name, users_hat.keys(),
+    db.create_table(messages_table_name, user_data_table_format)
+    db.save_message(messages_table_name, user_data_table_format.keys(),
                     (update.message.message_id,
                    user.id,
                    update.message.to_json()))
