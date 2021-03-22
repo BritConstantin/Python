@@ -24,12 +24,17 @@
     <autoscroll-to-editor value="false" />
     <autoscroll-from-editor value="true" />
     <show-object-properties value="true" />
-    <loaded-nodes />
+    <loaded-nodes>
+      <connection connection-id="843568b5-21c1-4a2d-9550-0bbd443fc16e">
+        <schema name="main" object-types="index, view, dataset trigger, column, table, constraint" />
+      </connection>
+    </loaded-nodes>
   </component>
   <component name="DBNavigator.Project.DatabaseConsoleManager">
     <connection id="843568b5-21c1-4a2d-9550-0bbd443fc16e">
       <console name="conversationbot_3_0.db" type="STANDARD" schema="main" session="Main"><![CDATA[select * from messages
 select * from user_data
+
 
       INSERT or REPLACE INTO main.user_data 
                  VALUES ( 307775861,
@@ -43,6 +48,9 @@ select * from user_data
     <connection id="9ce853ff-83d7-484a-884e-105d3f57e166">
       <console name="Connection 1" type="STANDARD" schema="" session="Main" />
     </connection>
+    <connection id="a3cdc34d-8e55-4a6b-800f-e07d5b67a9da">
+      <console name="Connection" type="STANDARD" schema="" session="Main" />
+    </connection>
   </component>
   <component name="DBNavigator.Project.DatabaseFileManager">
     <open-files />
@@ -50,6 +58,7 @@ select * from user_data
   <component name="DBNavigator.Project.DatabaseSessionManager">
     <connection id="843568b5-21c1-4a2d-9550-0bbd443fc16e" />
     <connection id="9ce853ff-83d7-484a-884e-105d3f57e166" />
+    <connection id="a3cdc34d-8e55-4a6b-800f-e07d5b67a9da" />
   </component>
   <component name="DBNavigator.Project.DatasetFilterManager">
     <filter-actions connection-id="843568b5-21c1-4a2d-9550-0bbd443fc16e" dataset="main.user_data" active-filter-id="" />
@@ -95,7 +104,7 @@ select * from user_data
           <port value="1234" />
           <database value="database" />
           <files>
-            <file path="C:\Users\kbrit\PycharmProjects\Internship\PythonStudy\assignments\conversationbot_3_0.db" schema="main" />
+            <file path="C:\Users\Constantine\PycharmProjects\python\assignments\conversationbot_3_0.db" schema="main" />
           </files>
           <type value="NONE" />
           <user value="" />
@@ -170,6 +179,93 @@ select * from user_data
       <connection id="9ce853ff-83d7-484a-884e-105d3f57e166" active="true">
         <database>
           <name value="Connection 1" />
+          <description value="" />
+          <database-type value="SQLITE" />
+          <config-type value="BASIC" />
+          <database-version value="9999.0" />
+          <driver-source value="BUILTIN" />
+          <driver-library value="" />
+          <driver value="" />
+          <url-type value="FILE" />
+          <host value="localhost" />
+          <port value="1234" />
+          <database value="database" />
+          <files>
+            <file path="sqlite.db" schema="main" />
+          </files>
+          <type value="NONE" />
+          <user value="" />
+          <deprecated-pwd value="" />
+        </database>
+        <properties>
+          <auto-commit value="false" />
+        </properties>
+        <ssh-settings>
+          <active value="false" />
+          <proxy-host value="" />
+          <proxy-port value="22" />
+          <proxy-user value="" />
+          <deprecated-proxy-pwd value="" />
+          <auth-type value="PASSWORD" />
+          <key-file value="" />
+          <key-passphrase value="" />
+        </ssh-settings>
+        <ssl-settings>
+          <active value="false" />
+          <certificate-authority-file value="" />
+          <client-certificate-file value="" />
+          <client-key-file value="" />
+        </ssl-settings>
+        <details>
+          <charset value="UTF-8" />
+          <session-management value="true" />
+          <ddl-file-binding value="true" />
+          <database-logging value="false" />
+          <connect-automatically value="true" />
+          <restore-workspace value="true" />
+          <restore-workspace-deep value="true" />
+          <environment-type value="default" />
+          <connectivity-timeout value="5" />
+          <idle-time-to-disconnect value="30" />
+          <idle-time-to-disconnect-pool value="5" />
+          <credential-expiry-time value="10" />
+          <max-connection-pool-size value="7" />
+          <alternative-statement-delimiter value="" />
+        </details>
+        <object-filters hide-empty-schemas="false" hide-pseudo-columns="false">
+          <object-type-filter use-master-settings="true">
+            <object-type name="SCHEMA" enabled="true" />
+            <object-type name="USER" enabled="true" />
+            <object-type name="ROLE" enabled="true" />
+            <object-type name="PRIVILEGE" enabled="true" />
+            <object-type name="CHARSET" enabled="true" />
+            <object-type name="TABLE" enabled="true" />
+            <object-type name="VIEW" enabled="true" />
+            <object-type name="MATERIALIZED_VIEW" enabled="true" />
+            <object-type name="NESTED_TABLE" enabled="true" />
+            <object-type name="COLUMN" enabled="true" />
+            <object-type name="INDEX" enabled="true" />
+            <object-type name="CONSTRAINT" enabled="true" />
+            <object-type name="DATASET_TRIGGER" enabled="true" />
+            <object-type name="DATABASE_TRIGGER" enabled="true" />
+            <object-type name="SYNONYM" enabled="true" />
+            <object-type name="SEQUENCE" enabled="true" />
+            <object-type name="PROCEDURE" enabled="true" />
+            <object-type name="FUNCTION" enabled="true" />
+            <object-type name="PACKAGE" enabled="true" />
+            <object-type name="TYPE" enabled="true" />
+            <object-type name="TYPE_ATTRIBUTE" enabled="true" />
+            <object-type name="ARGUMENT" enabled="true" />
+            <object-type name="DIMENSION" enabled="true" />
+            <object-type name="CLUSTER" enabled="true" />
+            <object-type name="DBLINK" enabled="true" />
+          </object-type-filter>
+          <object-name-filters />
+        </object-filters>
+      </connection>
+      <connection id="a3cdc34d-8e55-4a6b-800f-e07d5b67a9da" active="true">
+        <database>
+          <name value="Connection" />
           <description value="" />
           <database-type value="SQLITE" />
           <config-type value="BASIC" />
