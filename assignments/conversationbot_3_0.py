@@ -21,15 +21,16 @@ from bot_info import conversation_3_0_bot_TOKEN
 # done: add method that will insert data in to user_data table
 # done: add method that would return all users
 # done: check how to get user number
-# todo: add check 'is_all_datat_filled?'
+# done: add check 'is_all_datat_filled?'
+# todo: add selection of genger like mail|female
 # todo: add check 'can_i_use_your_photo?'
-# -->todo: save phone_number in to DB
+# todo: save phone_number in to DB
 # todo: study how to use logger correct
 #          logger.info(
 #         "Location of %s: %f / %f", user.first_name, user_location.latitude, user_location.longitude
 #     )
 # todo: learn how to work with pickling
-
+# todo: add ability to edit entered  data
 # region Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -46,7 +47,7 @@ user_data_table_format = {
     'message': 'string'
     }
 # Conversation stages
-CHOOSING, TYPING_REPLY, TYPING_CHOICE = range(3)
+CHOOSING, TYPING_REPLY, TYPING_CHOICE, REGISTERED = range(4)
 # Creating of keyboard markup
 reply_keyboard = [
     [KeyboardButton('Age'), KeyboardButton('Gender')],
@@ -76,7 +77,7 @@ def start(update: Update, context: CallbackContext) -> int:
 
     reply = update.message.reply_text(
             "Hi! I'm conversatin bot 3 0 \n"
-            "If you wan't to start new chat please fill the form:\nAge:\nGender:\nNumber",
+            "If you wan't to start new chat please fill the form:\nAge:\nGender:\nNumber:",
             reply_markup=markup
             )
     bot_update = Update(update_id=update.update_id + 1, message=reply)
@@ -95,8 +96,9 @@ def regular_choice(update: Update, context: CallbackContext) -> int:
     reply = update.message.reply_text(f'Your {text.lower()}?')
     bot_update = Update(update_id=update.update_id + 1, message=reply)
     save_message_to_db(bot_update, context)
-    return TYPING_REPLY
 
+    is_registration_done(update, context)
+    return TYPING_REPLY
 
 
 def received_information(update: Update, context: CallbackContext) -> int:
@@ -106,15 +108,16 @@ def received_information(update: Update, context: CallbackContext) -> int:
     category = user_data['choice']
     user_data[category] = text
     del user_data['choice']
-    print(context.user_data)
+    # print(context.user_data)
     save_message_to_db(update, context)
     reply = update.message.reply_text(
             "Neat! Just so you know, this is what you already fill:"
-            f"{facts_to_str(user_data)} Please continue to enter data.",
+            f"{facts_to_str(user_data)}",
             reply_markup=markup,
             )
     bot_update = Update(update_id=update.update_id + 1, message=reply)
     save_message_to_db(bot_update, context)
+    is_registration_done(update, context)
     return CHOOSING
 
 
@@ -134,6 +137,26 @@ def done(update: Update, context: CallbackContext) -> int:
     return ConversationHandler.END
 
 
+def is_registration_done(update: Update, context: CallbackContext):
+    print('...' + is_registration_done.__name__ + '()')
+    counter = 0
+    if reply_keyboard[0][0].text in context.user_data.keys():
+        print(f'     √ {reply_keyboard[0][0].text} -> {context.user_data[reply_keyboard[0][0].text]}')
+        counter += 1
+    if reply_keyboard[0][1].text in context.user_data:
+        print(f'     √ {reply_keyboard[0][1].text} -> {context.user_data[reply_keyboard[0][1].text]}')
+        counter += 1
+    if "phone_number" in context.user_data:
+        print(f'     √ {"phone_number"} -> {context.user_data["phone_number"]}')
+        counter += 1
+
+    if counter == 3:
+        update.message.from_user.send_message("Thanks you for your registration")
+
+        return REGISTERED
+    else:
+        update.message.from_user.send_message("Please continue registration")
+        return CHOOSING
 
 
 
@@ -151,6 +174,7 @@ def save_contact(update: Update, context: CallbackContext):
         bot_update = Update(update_id=update.update_id + 1, message=reply)
         save_message_to_db(bot_update, context)
 
+    is_registration_done(update, context)
     return CHOOSING
 
 
@@ -239,6 +263,11 @@ def save_user_to_db(update: Update, context: CallbackContext):
 
 def fallbacks(args):
     print('!!!!!!!!!!!!!!!!! we in fallback!!!!!!!!!!!!!!!!')
+    raise Exception("!!!!!!!!!!!!!!!!! we in fallback!!!!!!!!!!!!!!!!")
+
+
+def susers_online(update: Update, context: CallbackContext):
+    update.message.from_user.send_message("For now you are the one online.")
 
 
 def main() -> None:
@@ -270,6 +299,9 @@ def main() -> None:
                     MessageHandler(Filters.regex(f'^({reply_keyboard[2][0].text})$'), done)
 
                     ],
+                REGISTERED: [
+                    MessageHandler(Filters.command('users_online'), susers_online)
+                    ]
                 },
             fallbacks=[MessageHandler(Filters.regex(f'^(fallbacks)$'), fallbacks)],
             )
