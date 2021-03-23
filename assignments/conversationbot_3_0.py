@@ -22,9 +22,9 @@ from bot_info import conversation_3_0_bot_TOKEN
 # done: add method that would return all users
 # done: check how to get user number
 # done: add check 'is_all_datat_filled?'
+# done: save phone_number in to DB
 # todo: add selection of genger like mail|female
 # todo: add check 'can_i_use_your_photo?'
-# todo: save phone_number in to DB
 # todo: study how to use logger correct
 #          logger.info(
 #         "Location of %s: %f / %f", user.first_name, user_location.latitude, user_location.longitude
@@ -159,7 +159,6 @@ def is_registration_done(update: Update, context: CallbackContext):
         return CHOOSING
 
 
-
 def save_contact(update: Update, context: CallbackContext):
     print('...' + save_contact.__name__ + '()')
 
@@ -233,29 +232,37 @@ def create_user_data_table():
 
 
 def save_user_to_db(update: Update, context: CallbackContext):
-    print('...' + save_user_to_db.__name__ + '()')
+    print('...' + save_user_to_db.__name__ + '() ->', end=' ')
     db = DbWorker(db_name)
     user = update.message.from_user
     user_id = user.id
     first_name = user.first_name
     last_name = user.last_name
-    age = context.user_data[reply_keyboard[0][0]] \
-        if reply_keyboard[0][1] in context.user_data.keys() else 'NULL'
-    gender = context.user_data[reply_keyboard[0][1]] \
-        if reply_keyboard[0][1] in context.user_data.keys() else 'NULL'
-    experience = 'NULL'  # context.user_data[reply_keyboard[1][0]] \
-    # if reply_keyboard[1][0] in context.user_data.keys()
-    if 'phone_number' in (update.message.to_dict() or context.user_data):
-        print('--------------> phone number is in. Saving it to db')
-        number = update.message.contact.phone_number
-    else:
-        number = 'NULL'
-    exec_command = f""" INSERT or REPLACE INTO {user_data_table} 
-                 VALUES ( {user_id}, '{first_name}', '{last_name}', '{age}', '{gender}', '{experience}', '{number}'
-            );"""
-
-    db.exec(exec_command)
-    db.close_connection()
+    try:
+        age = context.user_data[reply_keyboard[0][0].text] if reply_keyboard[0][
+                                                                  1].text in context.user_data.keys() else 'NULL'
+        gender = context.user_data[reply_keyboard[0][1].text] \
+            if reply_keyboard[0][1].text in context.user_data.keys() else 'NULL'
+        experience = 'NULL'  # context.user_data[reply_keyboard[1][0]] \
+        # if reply_keyboard[1][0] in context.user_data.keys()
+        if 'contact' in update.message.to_json():
+            if 'phone_number' in update.message.contact.to_json():
+                number = update.message.contact.phone_number
+                # print(f'--------if------> phone number is in. Saving it to db{update.message.contact.phone_number}')
+        elif 'phone_number' in context.user_data:
+            number = context.user_data['phone_number']
+            # print(f'--------elif------> phone number is in. Saving it to db{context.user_data}')
+        else:
+            number = 'NULL'
+        exec_command = f""" INSERT or REPLACE INTO {user_data_table} 
+                     VALUES ( {user_id}, '{first_name}', '{last_name}', '{age}', '{gender}', '{experience}', '{number}'
+                );"""
+        print(f'{age}, {gender},{experience}, {number}')
+        db.exec(exec_command)
+        db.close_connection()
+    except Exception as e:
+        print(f"""          EXception handled in {db_name}{save_user_to_db.__name__}, exeption is: 
+                {e}""")
 
 
 # endregion
