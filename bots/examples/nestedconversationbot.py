@@ -331,6 +331,7 @@ def main() -> None:
             # End conversation alltogether
             STOPPING: STOPPING,
         },
+
     )
 
     # Set up second level ConversationHandler (adding a person)

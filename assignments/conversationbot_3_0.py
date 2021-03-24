@@ -272,9 +272,17 @@ def stop(update: Update, context: CallbackContext):
     save_message_to_db(update, context)
     ConversationHandler.END
 
+def timeout(conversations):
+    print('...' + timeout.__name__ + '() ->', end=' ')
+    # save_message_to_db(update, context)
+    for s in conversations:
+        print(f'        {s}')
+    ConversationHandler.END
+
 
 def susers_online(update: Update, context: CallbackContext):
     update.message.from_user.send_message("For now you are the one online.")
+
 
 
 def main() -> None:
@@ -303,8 +311,11 @@ def main() -> None:
                     MessageHandler(Filters.command('users_online'), susers_online)
                     ]
                 },
-            fallbacks=[CommandHandler('stop',stop )]
+            fallbacks=[CommandHandler('stop',stop )],
+            # conversation_timeout=10,
+
             )
+    # conv_handler._trigger_timeout(context= job=timeout(conv_handler.conversations))
     dispatcher.add_handler(conv_handler)
     dispatcher.add_handler(MessageHandler(Filters.text , save_message_to_db))
 
