@@ -73,7 +73,6 @@ def facts_to_str(user_data: Dict[str, str]) -> str:
 def start(update: Update, context: CallbackContext) -> int:
     print('...' + start.__name__ + '()')
     save_message_to_db(update, context)
-    print('contact' in update.message.to_dict().keys())
 
     reply = update.message.reply_text(
             "Hi! I'm conversation bot 3 0 \n"
@@ -268,9 +267,10 @@ def save_user_to_db(update: Update, context: CallbackContext):
 # endregion
 
 
-def fallbacks(args):
-    print('!!!!!!!!!!!!!!!!! we in fallback!!!!!!!!!!!!!!!!')
-    raise Exception("!!!!!!!!!!!!!!!!! we in fallback!!!!!!!!!!!!!!!!")
+def stop(update: Update, context: CallbackContext):
+    print('...' + stop.__name__ + '() ->', end=' ')
+    save_message_to_db(update, context)
+    ConversationHandler.END
 
 
 def susers_online(update: Update, context: CallbackContext):
@@ -303,7 +303,7 @@ def main() -> None:
                     MessageHandler(Filters.command('users_online'), susers_online)
                     ]
                 },
-            fallbacks=[MessageHandler(Filters.regex(f'^(fallbacks)$'), fallbacks)],
+            fallbacks=[CommandHandler('stop',stop )]
             )
     dispatcher.add_handler(conv_handler)
     dispatcher.add_handler(MessageHandler(Filters.text , save_message_to_db))

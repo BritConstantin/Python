@@ -28,7 +28,8 @@ from telegram.ext import (
 )
 
 
-from bot_info import my0py0test0bot_TOKEN
+from bot_info import my0py0test0bot_TOKEN, nested_conversation_bot
+
 # Enable logging
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
@@ -302,7 +303,7 @@ def stop_nested(update: Update, _: CallbackContext) -> str:
 
 def main() -> None:
     # Create the Updater and pass it your bot's token.
-    updater = Updater(my0py0test0bot_TOKEN)
+    updater = Updater(nested_conversation_bot)
 
     # Get the dispatcher to register handlers
     dispatcher = updater.dispatcher
