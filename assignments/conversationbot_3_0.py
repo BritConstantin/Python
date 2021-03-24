@@ -76,8 +76,8 @@ def start(update: Update, context: CallbackContext) -> int:
     print('contact' in update.message.to_dict().keys())
 
     reply = update.message.reply_text(
-            "Hi! I'm conversatin bot 3 0 \n"
-            "If you wan't to start new chat please fill the form:\nAge:\nGender:\nNumber:",
+            "Hi! I'm conversation bot 3 0 \n"
+            "If you want to start new chat please fill the form:\nAge:\nGender:\nNumber:",
             reply_markup=markup
             )
     bot_update = Update(update_id=update.update_id + 1, message=reply)
@@ -153,7 +153,8 @@ def is_registration_done(update: Update, context: CallbackContext):
     if counter == 3:
         update.message.from_user.send_message("Thanks you for your registration")
 
-        return REGISTERED
+        # return REGISTERED
+        return ConversationHandler.END
     else:
         update.message.from_user.send_message("Please continue registration")
         return CHOOSING
@@ -167,8 +168,7 @@ def save_contact(update: Update, context: CallbackContext):
         context.user_data['phone_number'] = update.message.contact.phone_number
         reply = update.message.from_user.send_message(
                 "Neat! Just so you know, this is what you already fill:"
-                f"{facts_to_str(context.user_data)}",
-                reply_markup=markup,
+                f"{facts_to_str(context.user_data)}"
                 )
         bot_update = Update(update_id=update.update_id + 1, message=reply)
         save_message_to_db(bot_update, context)
@@ -292,13 +292,6 @@ def main() -> None:
                     MessageHandler(Filters.contact, save_contact),
                     MessageHandler(Filters.regex(f'^({reply_keyboard[2][0].text})$'), done)
                     ],
-                # TYPING_CHOICE: [
-                #     MessageHandler(Filters.text & ~(Filters.command |
-                #                                     Filters.regex(f'^({reply_keyboard[2][0].text})$')),
-                #                    regular_choice),
-                #     MessageHandler(Filters.regex(f'^({reply_keyboard[2][0].text})$'), done)
-                #
-                #     ],
                 TYPING_REPLY: [
                     MessageHandler(Filters.text & ~(Filters.command |
                                                     Filters.regex(f'^({reply_keyboard[2][0].text})$')),
@@ -312,10 +305,8 @@ def main() -> None:
                 },
             fallbacks=[MessageHandler(Filters.regex(f'^(fallbacks)$'), fallbacks)],
             )
-
-    # the handler would handle all metssages that would not handled by others and save to the DB
-
     dispatcher.add_handler(conv_handler)
+    dispatcher.add_handler(MessageHandler(Filters.text , save_message_to_db))
 
     # Start the Bot
     updater.start_polling()

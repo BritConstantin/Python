@@ -9,3 +9,9 @@ B
 Hints/db_execut.py,f\2\f269ce73a8b5d13c7dd6553968c6ab956d1347aa
 R
 "assignments/conversationbot_3_0.db,7\c\7cb14fad6ccdf5634b19ccc55ac6b633603b6799
+;
+bot_info.py,0\4\047dec89a29693bd8805fa9d1aef56aabea0ca6c
+H
+bots/file_storage_bot.py,a\1\a14c1aeb8a645768f94c2a05e52dbc415001e711
+J
+bots/examples/inlinebot.py,b\1\b1438908afc046d4f9d31ebeb42fb518cfb707f0
