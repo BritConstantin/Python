@@ -2,12 +2,12 @@ import sqlite3
 from random import randint
 
 """
-SqLite supported method:
-    TEXT
+SqLite supported data types:
     NULL
+    TEXT - string
     INTEGER
-    REAL
-    BLOB
+    REAL - float
+    BLOB - any type file
 """
 
 
