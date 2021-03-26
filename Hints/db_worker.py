@@ -1,3 +1,4 @@
+import logging
 import sqlite3
 from random import randint
 
@@ -13,10 +14,16 @@ SqLite supported data types:
 
 class DbWorker:
     # todo: Add log level to class
-    # todo: add normal exception handling to all methods
-    def __init__(self, db_name, loglevel=0):
+    # todo: add normal exception handling to all methods(logger)
+
+
+    def __init__(self, db_name, loglevel=logging.INFO):
+        logging.basicConfig()
         self.conn = sqlite3.connect(f'{db_name}.db')
         self.db_name = db_name
+        logging.basicConfig(format='%(asctime)s|%(name)s|%(levelname)s|%(message)s', level=logging.INFO)
+        self.log = logging.getLogger(__name__)
+        self.log.level =
         self.loglevel = loglevel
 
     def exec(self, command):
