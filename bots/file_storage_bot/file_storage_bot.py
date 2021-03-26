@@ -12,7 +12,7 @@ from telegram.ext import (
 from Hints.db_worker import DbWorker
 from bot_info import file_storage_1_2_Bot
 from db_data import *
-
+# TODO: finish db creation
 # region var declaration
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 log = logging.getLogger(__name__)

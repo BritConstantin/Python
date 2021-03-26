@@ -41,8 +41,8 @@ Users Db contains two tables:
 # done: add new table user_data
 # done: add method that will insert data in to user_data table
 # done: add method that would return all users
+# done in conversation_bot_3_0.py: check how to get user number
 # todo: finish the db_keyboard realization(db command handler)
-# todo: check how to get user number
 # todo: add method that would filter all messages by user id, and count
 # todo: add method that will read data for the user which asked for it
 # todo: add error handling table(save handled exception with stacktrace
