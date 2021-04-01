@@ -15,3 +15,9 @@ V
 &bots/examples/nestedconversationbot.py,5\7\577f28f3630be889ba5ae30d8d654b814b127665
 4
 TODO,b\6\b698c11e84460ed5999bfeb5cbf25b865c238f3c
+P
+ bots/file_storage_bot/db_data.py,d\f\dfd9b321a2901c162a41f9f45a684d53fca9852a
+Y
+)bots/file_storage_bot/file_storage_bot.db,1\a\1a3b8130b1fb61f8b4a49d34465f0ba612f9b983
+Y
+)bots/file_storage_bot/file_storage_bot.py,2\a\2a0d8056426f9af3ccadbb48a59c64220d488ef0
