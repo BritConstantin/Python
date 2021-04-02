@@ -1,6 +1,8 @@
 import logging
 from pathlib import Path
-from telegram import ReplyKeyboardMarkup, Update, KeyboardButton
+
+import telegram
+from telegram import ReplyKeyboardMarkup, Update, KeyboardButton, File
 from telegram.ext import (
     Updater,
     CommandHandler,
@@ -19,6 +21,7 @@ logging.basicConfig(format='%(asctime)s|%(name)s|%(levelname)s|%(message)s', lev
 log = logging.getLogger(__name__)
 
 LOGGED_IN = range(0,1)
+updater = Updater(file_storage_1_2_Bot)
 # endregion
 
 def initiate_db():
@@ -94,12 +97,23 @@ def start(update: Update, context: CallbackContext) -> int:
 def received_doc(update: Update, context: CallbackContext) -> int:
     log.info('...' + received_doc.__name__ + '()')
     log.info(update.message.to_json())
-    file_name = ""
+
     parent_key= ""
-    if 'audio".{"file_id"' in update.message.to_json():
-        file_name = f'{update.message.document.file_name} ({update.message.audio.mime_type})'
-        for s in update.message.to_dict():
-            print(s)
+
+    if '"audio": {"file_id"' in update.message.to_json():
+        file = update.message.audio
+        file_id = file.file_id
+        file_name = file.file_name
+        file_size = file.file_size
+        mime_type = file.mime_type
+        local_file_name = updater.bot.getFile(file_id=file_id).download()
+        log.info(f' File "{local_file_name}" downloaded')
+
+        file_name = f'{update.message.audio.file_name} ({update.message.audio.mime_type})'
+    else:
+        file_name = "Not handled"
+        print(update.message.to_json())
+
     update.message.from_user.send_message(f"you send me doc {file_name}")
 
     return LOGGED_IN
@@ -133,7 +147,6 @@ def received_doc(update: Update, context: CallbackContext) -> int:
 def main() -> None:
     log.info('...' + main.__name__ + '()')
     initiate_db()
-    updater = Updater(file_storage_1_2_Bot)
     dispatcher = updater.dispatcher
     conv_handler = ConversationHandler(
             entry_points=[CommandHandler('start', start)],
