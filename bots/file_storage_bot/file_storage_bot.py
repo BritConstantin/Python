@@ -10,18 +10,21 @@ from telegram.ext import (
     Filters,
     ConversationHandler,
     CallbackContext
-    )
+)
 from Hints.db_worker import DbWorker
 from bot_info import file_storage_1_2_Bot
-from db_data import *
+from bots.file_storage_bot.db_data import *
+from Hints.tg_file_worker import TgFileWorker
 
 # done: finish db creation
 # region var declaration
 logging.basicConfig(format='%(asctime)s|%(name)s|%(levelname)s|%(message)s', level=logging.INFO)
 log = logging.getLogger(__name__)
 
-LOGGED_IN = range(0,1)
+LOGGED_IN = range(0, 1)
 updater = Updater(file_storage_1_2_Bot)
+
+
 # endregion
 
 def initiate_db():
@@ -41,7 +44,6 @@ def save_file(update: Update, context: CallbackContext) -> int:
     update.message.from_user.send_message("now you send to my file and I'll try to save it")
 
     return LOGGED_IN
-
 
 
 def start(update: Update, context: CallbackContext) -> int:
@@ -94,12 +96,15 @@ def start(update: Update, context: CallbackContext) -> int:
     }
 }
 """
+
+
+
+
 def received_doc(update: Update, context: CallbackContext) -> int:
     log.info('...' + received_doc.__name__ + '()')
     log.info(update.message.to_json())
 
-    parent_key= ""
-
+    file_type = TgFileWorker.get_file_type(update.message)
     if '"audio": {"file_id"' in update.message.to_json():
         file = update.message.audio
         file_id = file.file_id
@@ -117,7 +122,6 @@ def received_doc(update: Update, context: CallbackContext) -> int:
     update.message.from_user.send_message(f"you send me doc {file_name}")
 
     return LOGGED_IN
-
 
 
 #
@@ -149,15 +153,15 @@ def main() -> None:
     initiate_db()
     dispatcher = updater.dispatcher
     conv_handler = ConversationHandler(
-            entry_points=[CommandHandler('start', start)],
-            states={
-                LOGGED_IN:[
-                    CommandHandler('savefile',save_file),
-                    MessageHandler(Filters.document|Filters.audio|Filters.photo, received_doc),
-                    ]
-                },
-            fallbacks=[],
-            )
+        entry_points=[CommandHandler('start', start)],
+        states={
+            LOGGED_IN: [
+                CommandHandler('savefile', save_file),
+                MessageHandler(Filters.document | Filters.audio | Filters.photo, received_doc),
+            ]
+        },
+        fallbacks=[],
+    )
     dispatcher.add_handler(conv_handler)
 
     # Start the Bot
