@@ -1,29 +1,34 @@
+import logging
 import sqlite3
 from random import randint
 
 """
-SqLite supported method:
-    TEXT
-    NUMERIC
+SqLite supported data types:
+    NULL
+    TEXT - string
     INTEGER
-    REAL
-    BLOB
+    REAL - float
+    BLOB - any type file
 """
 
 
 class DbWorker:
     # todo: Add log level to class
-    # todo: add normal exception handling to all methods
-    def __init__(self, db_name, loglevel=0):
+    # todo: add normal exception handling to all methods(logger)
+
+
+    def __init__(self, db_name, loglevel=logging.INFO):
+        logging.basicConfig()
         self.conn = sqlite3.connect(f'{db_name}.db')
         self.db_name = db_name
-        self.loglevel = loglevel
+        logging.basicConfig(format='%(asctime)s|%(name)s|%(levelname)s|%(message)s', level=logging.INFO)
+        self.log = logging.getLogger(__name__)
+        self.log.level = loglevel
 
     def exec(self, command):
         c = self.conn.cursor()
         try:
-            if self.loglevel > 0:
-                print("->> trying to execute the command:\n" + command)
+            self.log.info("->> trying to execute the command:\n" + command)
             c.execute(command)
             self.conn.commit()
         except sqlite3.OperationalError as e:
@@ -36,8 +41,7 @@ class DbWorker:
     def extract_data(self, command):
         c = self.conn.cursor()
         try:
-            if self.loglevel > 0:
-                print("->> trying to execute the command:\n" + command)
+            self.log.info("->> trying to execute the command:\n" + command)
             c.execute(command)
             data = c.fetchall()
             return data
@@ -59,7 +63,7 @@ class DbWorker:
             sql_command = f"""CREATE TABLE IF NOT EXISTS {table_name} (
                         {cols_str}
                         )"""
-            # print(' executing: ' + sql_command)
+            self.log.info(' executing: ' + sql_command)
             c.execute(sql_command)
 
 
@@ -79,11 +83,11 @@ class DbWorker:
             print(self.create_table.__name__)
             print(e)
 
-    def drop_table(self, table_name):
-        c = self.conn.cursor()
-        sql_command = f"DROP TABLE {table_name}"
-        # print(' executing: ' + sql_command)
-        c.execute(sql_command)
+    # def drop_table(self, table_name):
+    #     c = self.conn.cursor()
+    #     sql_command = f"DROP TABLE {table_name}"
+    #     # print(' executing: ' + sql_command)
+    #     c.execute(sql_command)
 
     # done
     def print_table(self, table_name):
@@ -99,14 +103,14 @@ class DbWorker:
             print(e)
 
     def get_all_table_rows(self, table_name):
-        print('...' + self.get_all_table_rows.__name__ + '()')
+        self.log.info('...' + self.get_all_table_rows.__name__ + '()')
         c = self.conn.cursor()
 
         try:
             with self.conn:
                 c.execute(f"SELECT * FROM {table_name}")
                 tmp = c.fetchall()
-                print(tmp)
+                self.log.info(tmp)
                 return tmp
 
         except sqlite3.OperationalError as e:
