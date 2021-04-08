@@ -18,7 +18,7 @@ from Hints.tg_file_worker import TgFileWorker
 
 # done: finish db creation
 # region var declaration
-logging.basicConfig(format='%(asctime)s|%(name)s|%(levelname)s|%(message)s', level=logging.INFO)
+logging.basicConfig(format='%(asctime)s|%(name)s|%(message)s', level=logging.INFO)
 log = logging.getLogger(__name__)
 
 LOGGED_IN = range(0, 1)
@@ -103,23 +103,27 @@ def start(update: Update, context: CallbackContext) -> int:
 def received_doc(update: Update, context: CallbackContext) -> int:
     log.info('...' + received_doc.__name__ + '()')
     log.info(update.message.to_json())
+    file_type = TgFileWorker.get_file_type(message=update.message)
+    the_file = TgFileWorker(update.message)
+    log.info(f' The file:\n{the_file}')
+    the_file.fill_document_fields()
+    log.info(f' The file:\n{the_file}')
+    the_file.download_file(updater.bot)
+    # if '"audio": {"file_id"' in update.message.to_json():
+    #     file = update.message.audio
+    #     file_id = file.file_id
+    #     file_name = file.file_name
+    #     file_size = file.file_size
+    #     mime_type = file.mime_type
+    #     local_file_name = updater.bot.getFile(file_id=file_id).download()
+    #     log.info(f' File "{local_file_name}" downloaded')
+    #
+    #     file_name = f'{update.message.audio.file_name} ({update.message.audio.mime_type})'
+    # else:
+    #     file_name = "Not handled"
+    #     print(update.message.to_json())
 
-    file_type = TgFileWorker.get_file_type(update.message)
-    if '"audio": {"file_id"' in update.message.to_json():
-        file = update.message.audio
-        file_id = file.file_id
-        file_name = file.file_name
-        file_size = file.file_size
-        mime_type = file.mime_type
-        local_file_name = updater.bot.getFile(file_id=file_id).download()
-        log.info(f' File "{local_file_name}" downloaded')
-
-        file_name = f'{update.message.audio.file_name} ({update.message.audio.mime_type})'
-    else:
-        file_name = "Not handled"
-        print(update.message.to_json())
-
-    update.message.from_user.send_message(f"you send me doc {file_name}")
+    update.message.from_user.send_message(f"you send me doc {the_file.actual_file_name}")
 
     return LOGGED_IN
 
