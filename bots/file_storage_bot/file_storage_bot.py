@@ -52,52 +52,6 @@ def start(update: Update, context: CallbackContext) -> int:
     return LOGGED_IN
 
 
-"""
-{
-"message_id":21,
-"date":1617275731,
-"chat":{
-    "id":307775861,
-    "type":"private",
-    "username":"Brit_K",
-    "first_name":"Constantine",
-    "last_name":"Brit"
-    },
-"entities":[],
-"caption_entities":[],
-"document":{
-    "file_id":"BQACAgIAAxkBAAMVYGWrUx1OrHEO-QZIZimPZFFRcfIAAtYLAAJbUzBL6eY1vvyrQ2EeBA",
-    "file_unique_id":"AgAD1gsAAltTMEs",
-    "thumb":{
-        "file_id":"AAMCAgADGQEAAxVgZatTHU6scQ75BkhmKY9kUVFx8gAC1gsAAltTMEvp5jW-_KtDYaQJI6IuAAMBAAdtAAP9dwACHgQ",
-        "file_unique_id":"AQADpAkjoi4AA_13AAI",
-        "width":320,
-        "height":94,
-        "file_size":7619
-    },
-    "file_name":"image (44).png",
-    "mime_type":"image/png",
-    "file_size":53659
-    },
-"photo":[],
-"new_chat_members":[],
-"new_chat_photo":[],
-"delete_chat_photo":false,
-"group_chat_created":false,
-"supergroup_chat_created":false,
-"channel_chat_created":false,
-"from":{
-    "id":307775861,
-    "first_name":"Constantine",
-    "is_bot":false,
-    "last_name":"Brit",
-    "username":"Brit_K",
-    "language_code":"en"
-    }
-}
-"""
-
-
 
 
 def received_doc(update: Update, context: CallbackContext) -> int:

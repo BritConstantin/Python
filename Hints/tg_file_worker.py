@@ -1,4 +1,5 @@
 import logging
+import os
 
 import telegram
 from telegram import message as tgm, Bot
@@ -38,17 +39,16 @@ class TgFileWorker:
             file_type = "audio"
         if "caption" in message.to_dict():
             file_type = "caption"
-        if "document" in message.to_dict():
-            file_type = "document"
         if "photo" in message.to_dict():
             file_type = "photo"
-        if "invoice" in message.to_dict():
-            file_type = "invoice"
         if "video" in message.to_dict():
             file_type = "video"
         if "video_note" in message.to_dict():
             file_type = "video_note"
-
+        if "invoice" in message.to_dict():
+            file_type = "invoice"
+        if "document" in message.to_dict():
+            file_type = "document"
         return file_type
 
     def fill_document_fields(self):
@@ -66,9 +66,15 @@ class TgFileWorker:
                '\tmime_type: {}\n' \
                '\tfile_type: {}'.format(self.tg_file_name, self.file_size, self.mime_type, self.file_type)
 
+
     def download_file(self, bot: Bot, path: str = ""):
+    # TODO: add something to prevent any injections with the file names
         if path == "":
             path = "/downloaded_files"
 
         self.actual_file_name = bot.getFile(file_id=self.file_id).download()
         self.log.info(' File "{}" downloaded with name "{}"'.format(self.tg_file_name, self.actual_file_name))
+        os.rename(r'{}'.format(self.actual_file_name), r'{}'.format(self.tg_file_name))
+        self.log.info(' File "{}" renamed "{}"'.format(self.actual_file_name, self.tg_file_name))
+
+
