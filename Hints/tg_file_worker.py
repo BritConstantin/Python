@@ -24,7 +24,7 @@ class TgFileWorker:
         self.file_unique_id_dict = dict()
         self.mime_type = ""
         self.file_size = -1
-        # FIXME: add check of other types
+        # FIXME: 2 add check of other types
         if self.file_type == 'document':
             self.fill_document_fields()
         else:
@@ -33,7 +33,7 @@ class TgFileWorker:
 
     @staticmethod
     def get_file_type(message: telegram.message) -> str:
-        # fixme: fix problem with detecting.txt files like photo file
+        # FIXME: 1 fix problem with detecting.txt files like photo file
         file_type = None
         if "animation" in message.to_dict():
             file_type = "animation"
@@ -67,8 +67,8 @@ class TgFileWorker:
                '\tfile_type: {}'.format(self.tg_file_name, self.file_size, self.mime_type, self.file_type)
 
     def download_file(self, bot: Bot, path: str = "", attempts: int = 0):
-        # TODO: fix implementation of download method by adding custom path
-        # TODO: add something to prevent any injections with the file names
+        # TODO: 3 fix implementation of download method by adding custom path
+        # TODO: 5 add something to prevent any injections with the file names
         # if path == "":
         #     path = "/downloaded_files"
 
