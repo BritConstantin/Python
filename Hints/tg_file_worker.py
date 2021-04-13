@@ -24,10 +24,12 @@ class TgFileWorker:
         self.file_unique_id_dict = dict()
         self.mime_type = ""
         self.file_size = -1
-        if self.file_type != 'photo':
+        # FIXME: add check of other types
+        if self.file_type == 'document':
             self.fill_document_fields()
         else:
-            self.log.error(f' File type {self.file_type} is not supported')
+            self.log.error(f' \n ERROR \n File type {self.file_type} is not supported')
+            raise NotImplementedError
 
     @staticmethod
     def get_file_type(message: telegram.message) -> str:
@@ -58,23 +60,33 @@ class TgFileWorker:
         self.mime_type = self.message.document.mime_type
         self.file_unique_id = self.message.document.file_unique_id
 
-        # FIXME: fix emplementation of download method by adding custom path
-
     def __str__(self) -> str:
         return '\ttg_file_name: {}\n' \
                '\tfile_size: {}\n' \
                '\tmime_type: {}\n' \
                '\tfile_type: {}'.format(self.tg_file_name, self.file_size, self.mime_type, self.file_type)
 
-
-    def download_file(self, bot: Bot, path: str = ""):
-    # TODO: add something to prevent any injections with the file names
-        if path == "":
-            path = "/downloaded_files"
+    def download_file(self, bot: Bot, path: str = "", attempts: int = 0):
+        # TODO: fix implementation of download method by adding custom path
+        # TODO: add something to prevent any injections with the file names
+        # if path == "":
+        #     path = "/downloaded_files"
 
         self.actual_file_name = bot.getFile(file_id=self.file_id).download()
         self.log.info(' File "{}" downloaded with name "{}"'.format(self.tg_file_name, self.actual_file_name))
-        os.rename(r'{}'.format(self.actual_file_name), r'{}'.format(self.tg_file_name))
-        self.log.info(' File "{}" renamed "{}"'.format(self.actual_file_name, self.tg_file_name))
+        if attempts == 0:
+            attempts == ''
 
-
+        try:
+            os.rename(r'{}'.format(self.actual_file_name),
+                      r'{}{}'.format(attempts, self.tg_file_name)
+                      )
+            self.log.info(' File "{}" renamed "{}"'.format(self.actual_file_name, self.tg_file_name))
+        except FileExistsError as e:
+            self.log.error('''
+            ERROR - FileExistsError 
+            File "{}" wasn't renamed because of 
+            {}'''.format(self.actual_file_name, e))
+            self.actual_file_name =('{}{}'.format(attempts, self.tg_file_name))
+            attempts += 1
+            self.download_file(bot,attempts=attempts)

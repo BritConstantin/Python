@@ -57,12 +57,21 @@ def start(update: Update, context: CallbackContext) -> int:
 def received_doc(update: Update, context: CallbackContext) -> int:
     log.info('...' + received_doc.__name__ + '()')
     log.info(update.message.to_json())
-    file_type = TgFileWorker.get_file_type(message=update.message)
-    the_file = TgFileWorker(update.message)
-    log.info(f' The file:\n{the_file}')
-    the_file.fill_document_fields()
-    log.info(f' The file:\n{the_file}')
-    the_file.download_file(updater.bot)
+    try:
+        file_type = TgFileWorker.get_file_type(message=update.message)
+        the_file = TgFileWorker(update.message)
+        log.info(f' The file:\n{the_file}')
+        the_file.download_file(updater.bot)
+
+        update.message.from_user.send_message(f"you send me doc {the_file.tg_file_name}")
+    except NotImplementedError as e:
+        update.message.from_user.send_message(f"Error while handling file apperared\n{e}")
+        log.error(f'{received_doc.__name__} raise the NotImplementedError' )
+        log.error(e)
+    # except FileExistsError as e:
+    #     update.message.from_user.send_message(f"FileExistsError while handling file apperared\n{e}")
+    #     log.error(f'FileExistsError ERROR ')
+    #     log.error(e)
     # if '"audio": {"file_id"' in update.message.to_json():
     #     file = update.message.audio
     #     file_id = file.file_id
@@ -77,7 +86,6 @@ def received_doc(update: Update, context: CallbackContext) -> int:
     #     file_name = "Not handled"
     #     print(update.message.to_json())
 
-    update.message.from_user.send_message(f"you send me doc {the_file.actual_file_name}")
 
     return LOGGED_IN
 
