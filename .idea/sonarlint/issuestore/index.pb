@@ -21,8 +21,6 @@ Y
 )bots/file_storage_bot/file_storage_bot.db,1\a\1a3b8130b1fb61f8b4a49d34465f0ba612f9b983
 Y
 )bots/file_storage_bot/file_storage_bot.py,2\a\2a0d8056426f9af3ccadbb48a59c64220d488ef0
-R
-"assignments/conversationbot_3_1.py,b\1\b1bfd1dce279ddb84108ead265a09ae73b3dd8b7
 I
 Hints/message_examples.py,b\c\bc14cb06aa890c55e788fe25fc95c25b55cddad7
 G

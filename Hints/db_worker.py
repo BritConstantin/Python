@@ -61,7 +61,7 @@ class DbWorker:
                 cols_str += col_name + " " + cols[col_name] + ", "
             cols_str = cols_str[:-2]
             sql_command = f"""CREATE TABLE IF NOT EXISTS {table_name} ( {cols_str} )"""
-            self.log.info(' executing: ' + sql_command)
+            self.log.debug(' executing: ' + sql_command)
             c.execute(sql_command)
 
 

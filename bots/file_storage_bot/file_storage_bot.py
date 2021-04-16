@@ -10,7 +10,7 @@ from telegram.ext import (
     Filters,
     ConversationHandler,
     CallbackContext
-)
+    )
 from Hints.db_worker import DbWorker
 from bot_info import file_storage_1_2_Bot
 from bots.file_storage_bot.db_data import *
@@ -41,7 +41,7 @@ def initiate_db():
 
 def save_file(update: Update, context: CallbackContext) -> int:
     log.info('...' + save_file.__name__ + '()')
-    update.message.from_user.send_message("now you send to my file and I'll try to save it")
+    update.message.from_user.send_message("now you send to me file and I'll try to save it")
 
     return LOGGED_IN
 
@@ -50,8 +50,6 @@ def start(update: Update, context: CallbackContext) -> int:
     log.info('...' + start.__name__ + '()')
     update.message.from_user.send_message("Hi username! \n availible commands are:\n /savefile")
     return LOGGED_IN
-
-
 
 
 def received_doc(update: Update, context: CallbackContext) -> int:
@@ -63,10 +61,11 @@ def received_doc(update: Update, context: CallbackContext) -> int:
         log.info(f' The file:\n{the_file}')
         the_file.download_file(updater.bot)
 
-        update.message.from_user.send_message(f"you send me doc {the_file.tg_file_name}")
+        update.message.from_user.send_message(f"you send me doc {the_file.tg_file_name} \n{the_file.__repr__()}")
     except NotImplementedError as e:
-        update.message.from_user.send_message(f"Error while handling file apperared\n{e}")
-        log.error(f'{received_doc.__name__} raise the NotImplementedError' )
+        update.message.from_user.send_message(
+            f"Error while handling a file apperared\nNotImplementedError\n{e}")
+        log.error(f'{received_doc.__name__} raise the NotImplementedError')
         log.error(e)
     # except FileExistsError as e:
     #     update.message.from_user.send_message(f"FileExistsError while handling file apperared\n{e}")
@@ -85,7 +84,6 @@ def received_doc(update: Update, context: CallbackContext) -> int:
     # else:
     #     file_name = "Not handled"
     #     print(update.message.to_json())
-
 
     return LOGGED_IN
 
@@ -119,15 +117,25 @@ def main() -> None:
     initiate_db()
     dispatcher = updater.dispatcher
     conv_handler = ConversationHandler(
-        entry_points=[CommandHandler('start', start)],
-        states={
-            LOGGED_IN: [
-                CommandHandler('savefile', save_file),
-                MessageHandler(Filters.document | Filters.audio | Filters.photo, received_doc),
-            ]
-        },
-        fallbacks=[],
-    )
+            entry_points=[CommandHandler('start', start)],
+            states={
+                LOGGED_IN: [
+                    CommandHandler('savefile', save_file),
+                    MessageHandler(Filters.document |
+                                   Filters.photo |
+                                   Filters.audio |
+                                   Filters.dice |
+                                   Filters.invoice |
+                                   Filters.location|
+                                   Filters.video |
+                                   Filters.video_note |
+                                   Filters.animation |
+                                   Filters.voice
+                                   , received_doc),
+                    ]
+                },
+            fallbacks=[],
+            )
     dispatcher.add_handler(conv_handler)
 
     # Start the Bot
