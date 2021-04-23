@@ -14,9 +14,13 @@ from telegram.ext import (
 from Hints.db_worker import DbWorker
 from bot_info import file_storage_1_2_Bot
 from bots.file_storage_bot.db_data import *
-from Hints.tg_file_worker import TgFileWorker
+from Hints.tg_file_worker import TgFile
 
 # done: finish db creation
+# TODO: 1 add ability to save files in db after creation WIP
+# TODO: 1.2 add ability to send any file from db to user
+# TODO: 1.3 add abitlity to store 10 files for a user
+
 # region var declaration
 logging.basicConfig(format='%(asctime)s|%(name)s|%(message)s', level=logging.INFO)
 log = logging.getLogger(__name__)
@@ -56,36 +60,38 @@ def received_doc(update: Update, context: CallbackContext) -> int:
     log.info('...' + received_doc.__name__ + '()')
     log.info(update.message.to_json())
     try:
-        file_type = TgFileWorker.get_file_type(message=update.message)
-        the_file = TgFileWorker(update.message)
+        file_type = TgFile.get_file_type(message=update.message)
+        the_file = TgFile(update.message)
         log.info(f' The file:\n{the_file}')
         the_file.download_file(updater.bot)
-
+        write_to_db(the_file)
         update.message.from_user.send_message(f"you send me doc {the_file.tg_file_name} \n{the_file.__repr__()}")
     except NotImplementedError as e:
         update.message.from_user.send_message(
-            f"Error while handling a file apperared\nNotImplementedError\n{e}")
+                f"Error while handling a file apperared\nNotImplementedError\n{e}")
         log.error(f'{received_doc.__name__} raise the NotImplementedError')
         log.error(e)
-    # except FileExistsError as e:
-    #     update.message.from_user.send_message(f"FileExistsError while handling file apperared\n{e}")
-    #     log.error(f'FileExistsError ERROR ')
-    #     log.error(e)
-    # if '"audio": {"file_id"' in update.message.to_json():
-    #     file = update.message.audio
-    #     file_id = file.file_id
-    #     file_name = file.file_name
-    #     file_size = file.file_size
-    #     mime_type = file.mime_type
-    #     local_file_name = updater.bot.getFile(file_id=file_id).download()
-    #     log.info(f' File "{local_file_name}" downloaded')
-    #
-    #     file_name = f'{update.message.audio.file_name} ({update.message.audio.mime_type})'
-    # else:
-    #     file_name = "Not handled"
-    #     print(update.message.to_json())
+    except Exception as e:
+        update.message.from_user.send_message(
+                f"Error while handling a file apperared\nUnknownError\n"
+                f"☻Please contact with the administrator {e}")
+        log.error(f'{received_doc.__name__} raise the NotImplementedError')
+        log.error(e)
 
     return LOGGED_IN
+
+
+# TODO: WIP
+def write_to_db(the_file: TgFile):
+    log.info('...' + initiate_db.__name__ + '()')
+    try:
+        db = DbWorker(db_name, 1)
+        # TODO: 2 do I actually need new new method every time I whant to save something in db?
+        db.save_message(files_table_name, files_table_format, the_file.get_db_format_data)
+
+        db.close_connection()
+    except Exception as e:
+        log.exception(f' Exception is in {initiate_db.__name__}(): \n{e}')
 
 
 #
@@ -126,7 +132,7 @@ def main() -> None:
                                    Filters.audio |
                                    Filters.dice |
                                    Filters.invoice |
-                                   Filters.location|
+                                   Filters.location |
                                    Filters.video |
                                    Filters.video_note |
                                    Filters.animation |
