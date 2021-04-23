@@ -24,10 +24,18 @@ user_data_table_format = {
 files_table_format = {
     'file_id': 'INTEGER PRIMARY KEY AUTOINCREMENT',
     'creation_time': 'integer',
-    'format': 'text',
+    'file_type': 'text',
+    'file_size': 'text',
+    'actual_file_name': 'text',
+    'tg_file_name': 'text',
+    'file_id': 'text',
+    'file_unique_id': 'text',
+    'mime_type': 'text',
+    'duration': 'text',
+    'performer': 'text',
+    'title': 'text',
     'file': 'blob',
     }
-
 
 
 def main() -> None:
