@@ -16,7 +16,6 @@ class DbWorker:
     # todo: Add log level to class
     # todo: add normal exception handling to all methods(logger)
 
-
     def __init__(self, db_name, loglevel=logging.INFO):
         logging.basicConfig()
         self.conn = sqlite3.connect(f'{db_name}.db')
@@ -115,16 +114,32 @@ class DbWorker:
             print("ERROR in " + self.create_table.__name__)
             print(e)
 
-    def save_message(self, table_name, row):
+    def save_message(self, table_name: str, row: list) -> None:
         c = self.conn.cursor()
         try:
-            # print(f'---------->tpe of row: {type(row)}')
             for r in range(len(row)):
                 l = list(row)
-                #  print(f'---------->{type(l[r])}  r=  {str(l[r])}')
                 if str(type(l[r])) == "<class 'str'>" and "'" in l[r]:
-                    #     print('-------> We in!')
+                    l[r] = str(l[r]).replace("'", "''")
 
+            c.execute(f"""
+               INSERT INTO {table_name}
+               VALUES ({l[0]},'{l[1]}','{l[2]}')
+                           """)
+            # c.execute(f"""INSERT INTO {table_name}
+            #               VALUES ({str(column_names[0])}, {column_names[1]}, {column_names[2]}) """)
+            self.conn.commit()
+
+        except sqlite3.OperationalError as e:
+            print(self.save_message.__name__)
+            print(e)  # self.create_table.__name__ +
+    # TODO: !1 WIP Finish implementation
+    def save_tg_file(self, table_name: str, row: list) -> None:
+        c = self.conn.cursor()
+        try:
+            for r in range(len(row)):
+                l = list(row)
+                if str(type(l[r])) == "<class 'str'>" and "'" in l[r]:
                     l[r] = str(l[r]).replace("'", "''")
 
             c.execute(f"""
