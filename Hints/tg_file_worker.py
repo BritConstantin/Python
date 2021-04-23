@@ -1,12 +1,13 @@
 import logging
 import os
+import time
 
 import telegram
 from telegram import message as tgm, Bot
 from telegram.ext import Updater
 
 
-class TgFileWorker:
+class TgFile:
     def __init__(self, message: telegram.message, file_type=None, loglevel=logging.INFO):
         logging.basicConfig()
         logging.basicConfig(format='%(asctime)s|%(name)s|%(levelname)s|%(message)s', level=logging.INFO)
@@ -17,7 +18,7 @@ class TgFileWorker:
         self.message = message
         self.actual_file_name = ""
         self.tg_file_name = ""
-        self.file_type = TgFileWorker.get_file_type(message)
+        self.file_type = TgFile.get_file_type(message)
         self.file_id = ""
         self.file_unique_id = ""
         self.file_unique_id_dict = dict()
@@ -26,16 +27,20 @@ class TgFileWorker:
         self.duration = 0
         self.performer = ""
         self.title = ""
-
-        # FIXME: 1 add check of other types(done: documnet,audio,photo,video)
+        # TODO: 1 add ability to work with photos(wip)
+        # TODO: 1 add any sender info
+        # TODO: 2 add check of all types(
+        #     done: document,
+        #           audio,
+        #           video)
         if self.file_type == 'document':
             self.fill_document_fields()
         elif self.file_type == 'audio':
             self.fill_audiot_fields()
-        elif self.file_type == 'photo': # WIP
+        elif self.file_type == 'photo':  # WIP
             self.fill_photo_fields()
         elif self.file_type == 'video':
-            self.fill_video_fields() # WIP
+            self.fill_video_fields()
         else:
             self.log.error(f' \n ERROR \n File type {self.file_type} is not supported')
             raise NotImplementedError
@@ -43,12 +48,12 @@ class TgFileWorker:
     @staticmethod
     def get_file_type(message: telegram.message) -> str:
         # done: 1 fix problem with detecting.txt files like photo file
-        # FIXME: 1 add ability to handle
-        #  video
+        # FIXME: 2 add ability to handle
         #  video_note
         #  animation
-        #  voise
-        #  ivoise
+        #  voice
+        #  invoice
+        #  video -> done
         #  audio -> done
         #  photo -> done
         #  document -> done
@@ -71,7 +76,6 @@ class TgFileWorker:
         if '"document": {"file_id"' in message.to_json():
             file_type = "document"
 
-        print(f'--->file type is {file_type}')
         return file_type
 
     def fill_document_fields(self):
@@ -128,7 +132,6 @@ class TgFileWorker:
             attempts += 1
             self.download_file(bot, attempts=attempts)
 
-
     def fill_video_fields(self):
         '''
             "video": {
@@ -153,16 +156,23 @@ class TgFileWorker:
         self.width = self.message.video.width
         self.height = self.message.video.height
         self.duration = self.message.video.duration
-        self.thumb = self.message.video.thumb
-        self.thumb.file_id = self.message.video.thumb.file_id
-        self.thumb.file_unique_id = self.message.video.thumb.file_unique_id
-        self.thumb.width = self.message.video.thumb.width
-        self.thumb.height = self.message.video.thumb.height
-        self.thumb.file_size = self.message.video.thumb.file_size
-        # FIXME: 1 create file name in case of video file
-        # self.tg_file_name = self.message.video.file_name
+        if 'thumb' in self.message.video.to_json():
+            self.thumb = self.message.video.thumb
+            self.thumb.file_id = self.message.video.thumb.file_id
+            self.thumb.file_unique_id = self.message.video.thumb.file_unique_id
+            self.thumb.width = self.message.video.thumb.width
+            self.thumb.height = self.message.video.thumb.height
+            self.thumb.file_size = self.message.video.thumb.file_size
+        self.tg_file_name = f'video_{int(round(time.time() * 1000))}'
         self.mime_type = self.message.video.mime_type
         self.file_size = self.message.video.file_size
+
+    def get_db_format_data(self) -> dict:
+        d = dict()
+        for attribute in dir(self):
+            print(attribute)
+
+        return d
 
     def __str__(self) -> str:
         return '\ttg_file_name: {}\n' \
@@ -174,8 +184,11 @@ class TgFileWorker:
                                         self.file_type)
 
     def __repr__(self) -> str:
+        m = ""
+        for i in self.message.to_json().split(': {'):
+            m = f'{i} \n\n'
         return f'''
-        message  = "{self.message}"
+        message  = "{m}"
         actual_file_name = "{self.actual_file_name}"
         tg_file_name = "{self.tg_file_name}"
         file_type = "{self.file_type}"
@@ -189,5 +202,6 @@ class TgFileWorker:
         title = "{self.title}"
         width = "{self.width}"
         height = "{self.height}"
-        thumb = "{self.thumb}"
         '''
+
+# done: 1 create file name in case of video file
