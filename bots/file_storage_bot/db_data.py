@@ -23,7 +23,7 @@ user_data_table_format = {
 
 files_table_format = {
     'file_id': 'INTEGER PRIMARY KEY AUTOINCREMENT',
-    'creation_time': 'integer',
+    'creation_time': 'text',
     'file_type': 'text',
     'file_size': 'text',
     'actual_file_name': 'text',

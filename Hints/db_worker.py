@@ -134,20 +134,20 @@ class DbWorker:
             print(self.save_message.__name__)
             print(e)  # self.create_table.__name__ +
     # TODO: !1 WIP Finish implementation
-    def save_tg_file(self, table_name: str, row: list) -> None:
+    def save_tg_file(self, table_name: str, row: dict) -> None:
         c = self.conn.cursor()
+        values = ""
+        sql_commnand = ""
+        print(row)
         try:
-            for r in range(len(row)):
-                l = list(row)
-                if str(type(l[r])) == "<class 'str'>" and "'" in l[r]:
-                    l[r] = str(l[r]).replace("'", "''")
-
-            c.execute(f"""
-               INSERT INTO {table_name}
-               VALUES ({l[0]},'{l[1]}','{l[2]}')
-                           """)
-            # c.execute(f"""INSERT INTO {table_name}
-            #               VALUES ({str(column_names[0])}, {column_names[1]}, {column_names[2]}) """)
+            for r in row.values():
+                if type(r) == "<class 'str'>" and "'" in r:
+                   r = r.replace("'", "''")
+                print(f'___{r}')
+                values +=f"'{r}', "
+            sql_commnand =f" INSERT INTO {table_name} VALUES ({values}) "
+            print(sql_commnand)
+            c.execute(sql_commnand)
             self.conn.commit()
 
         except sqlite3.OperationalError as e:

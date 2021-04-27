@@ -81,13 +81,14 @@ def received_doc(update: Update, context: CallbackContext) -> int:
     return LOGGED_IN
 
 
-# TODO: WIP
+# TODO: WIP update db table to be able save all fieds that wer given
+#       in files_table_format
 def write_to_db(the_file: TgFile):
     log.info('...' + initiate_db.__name__ + '()')
     try:
         db = DbWorker(db_name, 1)
         # TODO: 2 do I actually need new new method every time I whant to save something in db?
-        db.save_message(files_table_name, files_table_format, the_file.get_db_format_data)
+        db.save_tg_file(files_table_name,  the_file.get_db_format_data())
 
         db.close_connection()
     except Exception as e:

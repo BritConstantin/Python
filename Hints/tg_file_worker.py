@@ -6,6 +6,8 @@ import telegram
 from telegram import message as tgm, Bot
 from telegram.ext import Updater
 
+from bots.file_storage_bot.db_data import files_table_format
+
 
 class TgFile:
     def __init__(self, message: telegram.message, file_type=None, loglevel=logging.INFO):
@@ -27,6 +29,7 @@ class TgFile:
         self.duration = 0
         self.performer = ""
         self.title = ""
+        self.creation_time = self.message.date
         # TODO: 1 add ability to work with photos(wip)
         # TODO: 1 add any sender info
         # TODO: 2 add check of all types(
@@ -168,9 +171,15 @@ class TgFile:
         self.file_size = self.message.video.file_size
 
     def get_db_format_data(self) -> dict:
-        d = dict()
-        for attribute in dir(self):
-            print(attribute)
+        d = files_table_format.copy()
+        for attr, value in self.__dict__.items():
+            # print(f'    {attr} = {value}')
+            if attr in d.keys():
+                # print(f'+++{attr}')
+                d[attr] = value
+            else:
+                # print(f'---{attr}')
+                d[attr] = ""
 
         return d
 
