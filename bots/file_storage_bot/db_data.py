@@ -4,7 +4,7 @@ db_name = Path('file_storage_bot.py').name[:-3]
 
 messages_table_name = 'main.messages'
 user_data_table_name = 'main.user_data'
-files_table_name = 'main.fies'
+files_table_name = 'main.files'
 
 messages_table_format = {
     'message_id': 'integer',
