@@ -80,11 +80,11 @@ class DbWorker:
             print(self.create_table.__name__)
             print(e)
 
-    # def drop_table(self, table_name):
-    #     c = self.conn.cursor()
-    #     sql_command = f"DROP TABLE {table_name}"
-    #     # print(' executing: ' + sql_command)
-    #     c.execute(sql_command)
+    def drop_table(self, table_name):
+        c = self.conn.cursor()
+        sql_command = f"DROP TABLE {table_name}"
+        # print(' executing: ' + sql_command)
+        c.execute(sql_command)
 
     # done
     def print_table(self, table_name):

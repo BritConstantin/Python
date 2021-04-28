@@ -28,7 +28,6 @@ files_table_format = {
     'file_size': 'text',
     'actual_file_name': 'text',
     'tg_file_name': 'text',
-    'file_id': 'text',
     'file_unique_id': 'text',
     'mime_type': 'text',
     'duration': 'text',
@@ -40,9 +39,7 @@ files_table_format = {
 
 def main() -> None:
     print(db_name)
-    # l.info('...' + main.__name__ + '()')
-    # initiate_db()
-    # updater = Updater(file_storage_1_2_Bot)
+
 
 
 if __name__ == '__main__':
