@@ -69,30 +69,32 @@ def received_doc(update: Update, context: CallbackContext) -> int:
     except NotImplementedError as e:
         update.message.from_user.send_message(
                 f"Error while handling a file apperared\nNotImplementedError\n{e}")
-        log.error(f'{received_doc.__name__} raise the NotImplementedError')
+        log.error(f'file_storage_bot.py>{received_doc.__name__}() raise the NotImplementedError')
         log.error(e)
     except Exception as e:
         update.message.from_user.send_message(
                 f"Error while handling a file apperared\nUnknownError\n"
                 f"☻Please contact with the administrator {e}")
-        log.error(f'{received_doc.__name__} raise the NotImplementedError')
-        log.error(e)
+        log.error(f'file_storage_bot.py>{received_doc.__name__}() raise the NotImplementedError\n{e}')
 
     return LOGGED_IN
 
 
-# TODO: WIP update db table to be able save all fieds that wer given
-#       in files_table_format
+# TODO: WIP test that files seva to the table
+#       fix issue appeared in file saving
 def write_to_db(the_file: TgFile):
-    log.info('...' + initiate_db.__name__ + '()')
+    log.info('...' + write_to_db.__name__ + '()')
     try:
         db = DbWorker(db_name, 1)
         # TODO: 2 do I actually need new new method every time I whant to save something in db?
         db.save_tg_file(files_table_name,  the_file.get_db_format_data())
 
         db.close_connection()
+    except NotImplementedError as e:
+        log.error(f'file_storage_bot.py>{write_to_db.__name__}() raise the NotImplementedError\n{e}')
+
     except Exception as e:
-        log.exception(f' Exception is in {initiate_db.__name__}(): \n{e}')
+        log.error(f'file_storage_bot.py>{write_to_db.__name__}() raise the Exception\n{e}')
 
 
 #

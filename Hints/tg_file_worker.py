@@ -111,6 +111,7 @@ class TgFile:
         self.file_size = self.message.audio.file_size
 
     def download_file(self, bot: Bot, path: str = "", attempts: int = 0):
+        # TODO: 1 fix issue with first income file name
         # TODO: 3 fix implementation of download method by adding custom path
         # TODO: 5 add something to prevent any injections with the file names
         # if path == "":
@@ -172,14 +173,16 @@ class TgFile:
 
     def get_db_format_data(self) -> dict:
         d = files_table_format.copy()
-        for attr, value in self.__dict__.items():
+        for k in d.keys():
+            d[k] = ""
+        for key, value in self.__dict__.items():
             # print(f'    {attr} = {value}')
-            if attr in d.keys():
+            if key in d.keys():
                 # print(f'+++{attr}')
-                d[attr] = value
-            else:
-                # print(f'---{attr}')
-                d[attr] = ""
+                d[key] = value
+                print(f'    {key} = {d[key]}')
+
+
 
         return d
 

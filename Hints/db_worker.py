@@ -143,9 +143,9 @@ class DbWorker:
             for r in row.values():
                 if type(r) == "<class 'str'>" and "'" in r:
                    r = r.replace("'", "''")
-                print(f'___{r}')
+                # print(f'___{r}')
                 values +=f"'{r}', "
-            sql_commnand =f" INSERT INTO {table_name} VALUES ({values}) "
+            sql_commnand =f" INSERT INTO {table_name} VALUES ({values[:-2]}) "
             print(sql_commnand)
             c.execute(sql_commnand)
             self.conn.commit()
