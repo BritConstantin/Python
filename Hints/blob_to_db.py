@@ -18,9 +18,12 @@ def insertBLOB(empId, name, photo, resumeFile):
         resume = convertToBinaryData(resumeFile)
         # Convert data into tuple format
         data_tuple = (empId, name, empPhoto, resume)
+        # cursor.execute('CREATE TABLE new_employee ( id INTEGER PRIMARY KEY, name TEXT NOT NULL, photo BLOB NOT NULL, resume BLOB NOT NULL);')
         cursor.execute(sqlite_insert_blob_query, data_tuple)
         sqliteConnection.commit()
         print("Image and file inserted successfully as a BLOB into a table")
+        print(cursor.execute("SELECT * FROM  new_employee;"))
+        print(cursor.fetchall())
         cursor.close()
 
     except sqlite3.Error as error:
@@ -30,5 +33,6 @@ def insertBLOB(empId, name, photo, resumeFile):
             sqliteConnection.close()
             print("the sqlite connection is closed")
 
-insertBLOB(1, "Smith", "E:\pynative\Python\photos\smith.jpg", "E:\pynative\Python\photos\smith_resume.txt")
-insertBLOB(2, "David", "E:\pynative\Python\photos\david.jpg", "E:\pynative\Python\photos\david_resume.txt")
+insertBLOB(3, "Smith2", "../bots/file_storage_bot/photo_1.jpg", "../bots/file_storage_bot/0test.txt")
+
+# insertBLOB(2, "David", "E:\pynative\Python\photos\david.jpg", "E:\pynative\Python\photos\david_resume.txt")

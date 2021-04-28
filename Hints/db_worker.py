@@ -13,6 +13,7 @@ SqLite supported data types:
 
 
 class DbWorker:
+    # TODO: add blob
     # todo: Add log level to class
     # todo: add normal exception handling to all methods(logger)
 
@@ -134,6 +135,7 @@ class DbWorker:
             print(self.save_message.__name__)
             print(e)  # self.create_table.__name__ +
     # TODO: !1 WIP Finish implementation
+    #
     def save_tg_file(self, table_name: str, row: dict) -> None:
         c = self.conn.cursor()
         values = ""

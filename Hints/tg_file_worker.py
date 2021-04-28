@@ -9,6 +9,7 @@ from telegram.ext import Updater
 from bots.file_storage_bot.db_data import files_table_format
 
 
+
 class TgFile:
     def __init__(self, message: telegram.message, file_type=None, loglevel=logging.INFO):
         logging.basicConfig()
@@ -171,10 +172,12 @@ class TgFile:
         self.mime_type = self.message.video.mime_type
         self.file_size = self.message.video.file_size
 
-    def get_db_format_data(self) -> dict:
+    def get_db_format_data(self) -> tuple:
+        # TODO: 1   add blob support
         d = files_table_format.copy()
         for k in d.keys():
             d[k] = ""
+        d['file'] = file_to_blob(self)
         for key, value in self.__dict__.items():
             # print(f'    {attr} = {value}')
             if key in d.keys():
@@ -182,9 +185,12 @@ class TgFile:
                 d[key] = value
                 print(f'    {key} = {d[key]}')
 
+        for
 
+        return
 
-        return d
+    def file_to_blob(self):
+
 
     def __str__(self) -> str:
         return '\ttg_file_name: {}\n' \
