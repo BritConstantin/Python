@@ -70,5 +70,7 @@ class TgFileWorker:
         if path == "":
             path = "/downloaded_files"
 
-        self.actual_file_name = bot.getFile(file_id=self.file_id).download()
+        the_file =  bot.getFile(file_id=self.file_id)
+        print(the_file)
+        self.actual_file_name =the_file.download()
         self.log.info(' File "{}" downloaded with name "{}"'.format(self.tg_file_name, self.actual_file_name))
