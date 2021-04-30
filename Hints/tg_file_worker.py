@@ -9,7 +9,6 @@ from telegram.ext import Updater
 from bots.file_storage_bot.db_data import files_table_format
 
 
-
 class TgFile:
     def __init__(self, message: telegram.message, file_type=None, loglevel=logging.INFO):
         logging.basicConfig()
@@ -21,7 +20,7 @@ class TgFile:
         self.message = message
         self.actual_file_name = ""
         self.tg_file_name = ""
-        self.file_type = TgFile.get_file_type(message)
+        self.file_type = TgFile.get_file_type(message, self.log)
         self.file_id = ""
         self.file_unique_id = ""
         self.file_unique_id_dict = dict()
@@ -50,7 +49,7 @@ class TgFile:
             raise NotImplementedError
 
     @staticmethod
-    def get_file_type(message: telegram.message) -> str:
+    def get_file_type(message: telegram.message, log) -> str:
         # done: 1 fix problem with detecting.txt files like photo file
         # FIXME: 2 add ability to handle
         #  video_note
@@ -79,10 +78,11 @@ class TgFile:
         #     file_type = "invoice"
         if '"document": {"file_id"' in message.to_json():
             file_type = "document"
-
+        log.info(f"...TgFile.{TgFile.get_file_type.__name__}() return {file_type}")
         return file_type
 
     def fill_document_fields(self):
+        self.log.info(f'...TgFile.{self.fill_document_fields.__name__}()');
         self.tg_file_name = self.message.document.file_name
         self.file_id = self.message.document.file_id
         self.file_size = self.message.document.file_size
@@ -102,6 +102,7 @@ class TgFile:
             "file_size": 7377897},
         :return:
         """
+        self.log.info(f'...TgFile.{self.fill_audiot_fields.__name__}()');
         self.file_id = self.message.audio.file_id
         self.file_unique_id = self.message.audio.file_unique_id
         self.duration = self.message.audio.duration
@@ -110,32 +111,6 @@ class TgFile:
         self.tg_file_name = self.message.audio.file_name
         self.mime_type = self.message.audio.mime_type
         self.file_size = self.message.audio.file_size
-
-    def download_file(self, bot: Bot, path: str = "", attempts: int = 0):
-        # TODO: 1 fix issue with first income file name
-        # TODO: 3 fix implementation of download method by adding custom path
-        # TODO: 5 add something to prevent any injections with the file names
-        # if path == "":
-        #     path = "/downloaded_files"
-
-        self.actual_file_name = bot.getFile(file_id=self.file_id).download()
-        self.log.info(' File "{}" downloaded with name "{}"'.format(self.tg_file_name, self.actual_file_name))
-        if attempts == 0:
-            attempts == ''
-
-        try:
-            os.rename(r'{}'.format(self.actual_file_name),
-                      r'{}{}'.format(attempts, self.tg_file_name)
-                      )
-            self.log.info(' File "{}" renamed "{}"'.format(self.actual_file_name, self.tg_file_name))
-        except FileExistsError as e:
-            self.log.error('''
-            ERROR - FileExistsError 
-            File "{}" wasn't renamed because of 
-            {}'''.format(self.actual_file_name, e))
-            self.actual_file_name = ('{}{}'.format(attempts, self.tg_file_name))
-            attempts += 1
-            self.download_file(bot, attempts=attempts)
 
     def fill_video_fields(self):
         '''
@@ -156,6 +131,8 @@ class TgFile:
         "file_size": 18153228},
         :return:
         '''
+
+        self.log.info(f'...TgFile.{self.fill_video_fields.__name__}()');
         self.file_id = self.message.video.file_id
         self.file_unique_id = self.message.video.file_unique_id
         self.width = self.message.video.width
@@ -172,25 +149,72 @@ class TgFile:
         self.mime_type = self.message.video.mime_type
         self.file_size = self.message.video.file_size
 
+    def download_file(self, bot: Bot, path: str = "", attempts: int = 0):
+        # TODO: 1 fix issue with first income file name
+        # TODO: 3 fix implementation of download method by adding custom path
+        # TODO: 5 add something to prevent any injections with the file names
+        # if path == "":
+        #     path = "/downloaded_files"
+
+        self.log.info('...TgFile.' + self.download_file.__name__ + '()')
+        self.actual_file_name = bot.getFile(file_id=self.file_id).download()
+        self.log.info(' File "{}" downloaded with name "{}"'.format(self.tg_file_name, self.actual_file_name))
+        if attempts == 0:
+            attempts = ''
+
+        try:
+            os.rename(r'{}'.format(self.actual_file_name),
+                      r'{}{}'.format(str(attempts), self.tg_file_name)
+                      )
+            self.log.info(' File "{}" renamed "{}{}"'.format(self.actual_file_name, attempts, self.tg_file_name))
+        except FileExistsError as e:
+            self.log.error('''
+            ERROR - FileExistsError 
+            File "{}" wasn't renamed because of 
+            {}'''.format(self.actual_file_name, e))
+            self.actual_file_name = ('{}{}'.format(attempts, self.tg_file_name))
+            if attempts == '':
+                attempts = 1
+            attempts += 1
+            self.download_file(bot, attempts=attempts)
+
     def get_db_format_data(self) -> tuple:
         # TODO: 1   add blob support
-        d = files_table_format.copy()
-        for k in d.keys():
-            d[k] = ""
-        d['file'] = file_to_blob(self)
-        for key, value in self.__dict__.items():
-            # print(f'    {attr} = {value}')
-            if key in d.keys():
-                # print(f'+++{attr}')
-                d[key] = value
-                print(f'    {key} = {d[key]}')
-
-        for
+        self.log.info('...TgFile.' + self.get_db_format_data.__name__ + '()')
+        try:
+            d = files_table_format.copy()
+            for k in d.keys():
+                d[k] = ""
+            d['file'] = self.file_to_blob()
+            for key, value in self.__dict__.items():
+                # print(f'    {attr} = {value}')
+                if key in d.keys():
+                    # print(f'+++{attr}')
+                    d[key] = value
+                    print(f'    {key} = {d[key]}')
+        except Exception as e:
+            self.log.info(f'...TgFile.{self.get_db_format_data.__name__}() catched exception \n{e} \n '
+                          f'with file:\n {self}')
 
         return
 
     def file_to_blob(self):
+        try:
+            return TgFile.convertToBinaryData(self.tg_file_name, self.log)
+        except Exception as e:
+            self.log.info(f'...TgFile.{self.file_to_blob.__name__}() catched exception \n{e} \n '
+                          f'with file:\n {self}')
 
+    @staticmethod
+    def convertToBinaryData(filename: str, log):
+        # Convert digital data to binary format
+        try:
+            with open(filename, 'rb') as file:
+                blobData = file.read()
+            return blobData
+        except Exception as e:
+            log.info(f'...TgFile.{TgFile.file_to_blob.__name__}() catched exception \n{e} \n '
+                     f'with file:\n {filename}')
 
     def __str__(self) -> str:
         return '\ttg_file_name: {}\n' \

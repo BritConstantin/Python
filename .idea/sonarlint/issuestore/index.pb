@@ -25,3 +25,7 @@ I
 Hints/message_examples.py,b\c\bc14cb06aa890c55e788fe25fc95c25b55cddad7
 G
 Hints/tg_file_worker.py,8\b\8be7d3cc1a0cfebed40a92e27420834ed0eb1bb5
+C
+Hints/blob_to_db.py,e\3\e31b449d8b6bb48c8f285addfd855e7d12396dc2
+C
+Hints/db_to_blob.py,8\9\8995de608a2fe65e757df2eafc9b1738c33efb36

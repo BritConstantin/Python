@@ -58,20 +58,22 @@ def start(update: Update, context: CallbackContext) -> int:
 
 def received_doc(update: Update, context: CallbackContext) -> int:
     log.info('...' + received_doc.__name__ + '()')
-    log.info(update.message.to_json())
     try:
-        file_type = TgFile.get_file_type(message=update.message)
+        file_type = TgFile.get_file_type(message=update.message, log=log)
         the_file = TgFile(update.message)
         log.info(f' The file:\n{the_file}')
         the_file.download_file(updater.bot)
         write_to_db(the_file)
         update.message.from_user.send_message(f"you send me doc {the_file.tg_file_name} \n{the_file.__repr__()}")
     except NotImplementedError as e:
+        log.info(update.message.to_json())
+
         update.message.from_user.send_message(
                 f"Error while handling a file apperared\nNotImplementedError\n{e}")
         log.error(f'file_storage_bot.py>{received_doc.__name__}() raise the NotImplementedError')
         log.error(e)
     except Exception as e:
+        log.info(update.message.to_json())
         update.message.from_user.send_message(
                 f"Error while handling a file apperared\nUnknownError\n"
                 f"☻Please contact with the administrator {e}")
@@ -87,7 +89,8 @@ def write_to_db(the_file: TgFile):
     try:
         db = DbWorker(db_name, 1)
         # TODO: 2 do I actually need new new method every time I whant to save something in db?
-        db.save_tg_file(files_table_name,  the_file.get_db_format_data())
+        # TODO: 1 remove comment
+        # db.save_tg_file(files_table_name,  the_file.get_db_format_data())
 
         db.close_connection()
     except NotImplementedError as e:

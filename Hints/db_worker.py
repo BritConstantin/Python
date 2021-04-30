@@ -148,7 +148,7 @@ class DbWorker:
                 # print(f'___{r}')
                 values +=f"'{r}', "
             sql_commnand =f" INSERT INTO {table_name} VALUES ({values[:-2]}) "
-            print(sql_commnand)
+            self.log.info(sql_commnand)
             c.execute(sql_commnand)
             self.conn.commit()
 
