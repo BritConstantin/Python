@@ -22,7 +22,8 @@ user_data_table_format = {
     }
 
 files_table_format = {
-    'file_id': 'INTEGER PRIMARY KEY AUTOINCREMENT',
+    # 'id': 'INTEGER PRIMARY KEY AUTOINCREMENT',
+    'file_id': 'text',
     'creation_time': 'text',
     'file_type': 'text',
     'file_size': 'text',

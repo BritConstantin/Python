@@ -29,6 +29,8 @@ class TgFile:
         self.duration = 0
         self.performer = ""
         self.title = ""
+        self.width = 0
+        self.height = 0
         self.creation_time = self.message.date
         # TODO: 1 add ability to work with photos(wip)
         # TODO: 1 add any sender info
@@ -192,11 +194,12 @@ class TgFile:
                     # print(f'+++{attr}')
                     d[key] = value
                     print(f'    {key} = {d[key]}')
+            return d
         except Exception as e:
-            self.log.info(f'...TgFile.{self.get_db_format_data.__name__}() catched exception \n{e} \n '
+            self.log.info(f'...TgFile.{self.get_db_format_data.__name__}() raised exception \n{e} \n '
                           f'with file:\n {self}')
 
-        return
+
 
     def file_to_blob(self):
         try:

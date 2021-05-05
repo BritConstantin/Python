@@ -90,7 +90,7 @@ def write_to_db(the_file: TgFile):
         db = DbWorker(db_name, 1)
         # TODO: 2 do I actually need new new method every time I whant to save something in db?
         # TODO: 1 remove comment
-        # db.save_tg_file(files_table_name,  the_file.get_db_format_data())
+        db.save_tg_file(files_table_name,  the_file.get_db_format_data())
 
         db.close_connection()
     except NotImplementedError as e:
@@ -126,7 +126,7 @@ def write_to_db(the_file: TgFile):
 
 def main() -> None:
     log.info('...' + main.__name__ + '()')
-    initiate_db()
+    # initiate_db()
     dispatcher = updater.dispatcher
     conv_handler = ConversationHandler(
             entry_points=[CommandHandler('start', start)],
