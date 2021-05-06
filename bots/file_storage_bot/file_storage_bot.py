@@ -10,13 +10,17 @@ from telegram.ext import (
     Filters,
     ConversationHandler,
     CallbackContext
-)
+    )
 from Hints.db_worker import DbWorker
 from bot_info import file_storage_1_2_Bot
 from bots.file_storage_bot.db_data import *
-from Hints.tg_file_worker import TgFileWorker
+from Hints.tg_file_worker import TgFile
 
 # done: finish db creation
+# TODO: 1 add ability to save files in db after creation WIP
+# TODO: 1.2 add ability to send any file from db to user
+# TODO: 1.3 add abitlity to store 10 files for a user
+
 # region var declaration
 logging.basicConfig(format='%(asctime)s|%(name)s|%(message)s', level=logging.INFO)
 log = logging.getLogger(__name__)
@@ -41,7 +45,7 @@ def initiate_db():
 
 def save_file(update: Update, context: CallbackContext) -> int:
     log.info('...' + save_file.__name__ + '()')
-    update.message.from_user.send_message("now you send to my file and I'll try to save it")
+    update.message.from_user.send_message("now you send to me file and I'll try to save it")
 
     return LOGGED_IN
 
@@ -52,85 +56,48 @@ def start(update: Update, context: CallbackContext) -> int:
     return LOGGED_IN
 
 
-"""
-{
-"message_id":21,
-"date":1617275731,
-"chat":{
-    "id":307775861,
-    "type":"private",
-    "username":"Brit_K",
-    "first_name":"Constantine",
-    "last_name":"Brit"
-    },
-"entities":[],
-"caption_entities":[],
-"document":{
-    "file_id":"BQACAgIAAxkBAAMVYGWrUx1OrHEO-QZIZimPZFFRcfIAAtYLAAJbUzBL6eY1vvyrQ2EeBA",
-    "file_unique_id":"AgAD1gsAAltTMEs",
-    "thumb":{
-        "file_id":"AAMCAgADGQEAAxVgZatTHU6scQ75BkhmKY9kUVFx8gAC1gsAAltTMEvp5jW-_KtDYaQJI6IuAAMBAAdtAAP9dwACHgQ",
-        "file_unique_id":"AQADpAkjoi4AA_13AAI",
-        "width":320,
-        "height":94,
-        "file_size":7619
-    },
-    "file_name":"image (44).png",
-    "mime_type":"image/png",
-    "file_size":53659
-    },
-"photo":[],
-"new_chat_members":[],
-"new_chat_photo":[],
-"delete_chat_photo":false,
-"group_chat_created":false,
-"supergroup_chat_created":false,
-"channel_chat_created":false,
-"from":{
-    "id":307775861,
-    "first_name":"Constantine",
-    "is_bot":false,
-    "last_name":"Brit",
-    "username":"Brit_K",
-    "language_code":"en"
-    }
-}
-"""
-
-
-
-
 def received_doc(update: Update, context: CallbackContext) -> int:
     log.info('...' + received_doc.__name__ + '()')
-    log.info(update.message.to_json())
-    file_type = TgFileWorker.get_file_type(message=update.message)
-    the_file = TgFileWorker(update.message)
-    log.info(f' The file:\n{the_file}')
-    log.info(f' The file:\n{the_file}')
-    log.info(f' The file:\n{the_file}')
-    log.info(f' The file:\n{the_file}')
-    log.info(f' The file:\n{the_file}')
-    log.info(f' The file:\n{the_file}')
-    the_file.fill_document_fields()
-    log.info(f' The file:\n{the_file}')
-    the_file.download_file(updater.bot)
-    # if '"audio": {"file_id"' in update.message.to_json():
-    #     file = update.message.audio
-    #     file_id = file.file_id
-    #     file_name = file.file_name
-    #     file_size = file.file_size
-    #     mime_type = file.mime_type
-    #     local_file_name = updater.bot.getFile(file_id=file_id).download()
-    #     log.info(f' File "{local_file_name}" downloaded')
-    #
-    #     file_name = f'{update.message.audio.file_name} ({update.message.audio.mime_type})'
-    # else:
-    #     file_name = "Not handled"
-    #     print(update.message.to_json())
+    try:
+        file_type = TgFile.get_file_type(message=update.message, log=log)
+        the_file = TgFile(update.message)
+        log.info(f' The file:\n{the_file}')
+        the_file.download_file(updater.bot)
+        write_to_db(the_file)
+        update.message.from_user.send_message(f"you send me doc {the_file.tg_file_name} \n{the_file.__repr__()}")
+    except NotImplementedError as e:
+        log.info(update.message.to_json())
 
-    update.message.from_user.send_message(f"you send me doc {the_file.actual_file_name}")
+        update.message.from_user.send_message(
+                f"Error while handling a file apperared\nNotImplementedError\n{e}")
+        log.error(f'file_storage_bot.py>{received_doc.__name__}() raise the NotImplementedError')
+        log.error(e)
+    except Exception as e:
+        log.info(update.message.to_json())
+        update.message.from_user.send_message(
+                f"Error while handling a file apperared\nUnknownError\n"
+                f"☻Please contact with the administrator {e}")
+        log.error(f'file_storage_bot.py>{received_doc.__name__}() raise the NotImplementedError\n{e}')
 
     return LOGGED_IN
+
+
+# TODO: WIP test that files seva to the table
+#       fix issue appeared in file saving
+def write_to_db(the_file: TgFile):
+    log.info('...' + write_to_db.__name__ + '()')
+    try:
+        db = DbWorker(db_name, 1)
+        # TODO: 2 do I actually need new new method every time I whant to save something in db?
+        # TODO: 1 remove comment
+        db.save_tg_file(files_table_name,  the_file.get_db_format_data())
+
+        db.close_connection()
+    except NotImplementedError as e:
+        log.error(f'file_storage_bot.py>{write_to_db.__name__}() raise the NotImplementedError\n{e}')
+
+    except Exception as e:
+        log.error(f'file_storage_bot.py>{write_to_db.__name__}() raise the Exception\n{e}')
 
 
 #
@@ -159,18 +126,28 @@ def received_doc(update: Update, context: CallbackContext) -> int:
 
 def main() -> None:
     log.info('...' + main.__name__ + '()')
-    initiate_db()
+    # initiate_db()
     dispatcher = updater.dispatcher
     conv_handler = ConversationHandler(
-        entry_points=[CommandHandler('start', start)],
-        states={
-            LOGGED_IN: [
-                CommandHandler('savefile', save_file),
-                MessageHandler(Filters.document | Filters.audio | Filters.photo, received_doc),
-            ]
-        },
-        fallbacks=[],
-    )
+            entry_points=[CommandHandler('start', start)],
+            states={
+                LOGGED_IN: [
+                    CommandHandler('savefile', save_file),
+                    MessageHandler(Filters.document |
+                                   Filters.photo |
+                                   Filters.audio |
+                                   Filters.dice |
+                                   Filters.invoice |
+                                   Filters.location |
+                                   Filters.video |
+                                   Filters.video_note |
+                                   Filters.animation |
+                                   Filters.voice
+                                   , received_doc),
+                    ]
+                },
+            fallbacks=[],
+            )
     dispatcher.add_handler(conv_handler)
 
     # Start the Bot

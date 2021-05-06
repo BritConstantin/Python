@@ -4,7 +4,7 @@ db_name = Path('file_storage_bot.py').name[:-3]
 
 messages_table_name = 'main.messages'
 user_data_table_name = 'main.user_data'
-files_table_name = 'main.fies'
+files_table_name = 'main.files'
 
 messages_table_format = {
     'message_id': 'integer',
@@ -22,19 +22,25 @@ user_data_table_format = {
     }
 
 files_table_format = {
-    'file_id': 'INTEGER PRIMARY KEY AUTOINCREMENT',
-    'creation_time': 'integer',
-    'format': 'text',
+    # 'id': 'INTEGER PRIMARY KEY AUTOINCREMENT',
+    'file_id': 'text',
+    'creation_time': 'text',
+    'file_type': 'text',
+    'file_size': 'text',
+    'actual_file_name': 'text',
+    'tg_file_name': 'text',
+    'file_unique_id': 'text',
+    'mime_type': 'text',
+    'duration': 'text',
+    'performer': 'text',
+    'title': 'text',
     'file': 'blob',
     }
 
 
-
 def main() -> None:
     print(db_name)
-    # l.info('...' + main.__name__ + '()')
-    # initiate_db()
-    # updater = Updater(file_storage_1_2_Bot)
+
 
 
 if __name__ == '__main__':

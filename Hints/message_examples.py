@@ -80,3 +80,27 @@ income_message_with_document = {
         "language_code": "en"
     }
 }
+video_json = '''{"message_id": 423, "date": 1618553007, "chat": {"id": 307775861, "type": "private", "username": "Brit_K", "first_name": "Constantine", "last_name": "Brit"}, "entities": [], "caption_entities": [], "photo": [], "video": {"file_id": "BAACAgIAAxkBAAIBp2B5KK_LS-cl2oKnJJk_Y_nDYClKAAIaDAACB-uwSwEh5PrlHCP9HwQ", "file_unique_id": "AgADGgwAAgfrsEs", "width": 1080, "height": 1920, "duration": 8, "thumb": {"file_id": "AAMCAgADGQEAAgGnYHkor8tL5yXagqckmT9j-cNgKUoAAhoMAAIH67BLASHk-uUcI_2A-E-kLgADAQAHbQADdDoAAh8E", "file_unique_id": "AQADgPhPpC4AA3Q6AAI", "width": 180, "height": 320, "file_size": 14130}, "mime_type": "video/mp4", "file_size": 18153228}, "new_chat_members": [], "new_chat_photo": [], "delete_chat_photo": false, "group_chat_created": false, "supergroup_chat_created": false, "channel_chat_created": false, "from": {"id": 307775861, "first_name": "Constantine", "is_bot": false, "last_name": "Brit", "username": "Brit_K", "language_code": "en"}}'''
+video = {
+    "message_id": 423,
+    "date": 1618553007,
+    "chat": {"id": 307775861, "type": "private", "username": "Brit_K", "first_name": "Constantine", "last_name": "Brit"},
+    "entities": [], "caption_entities": [], "photo": [],
+    "video": {
+        "file_id": "BAACAgIAAxkBAAIBp2B5KK_LS-cl2oKnJJk_Y_nDYClKAAIaDAACB-uwSwEh5PrlHCP9HwQ",
+        "file_unique_id": "AgADGgwAAgfrsEs",
+        "width": 1080,
+        "height": 1920,
+        "duration": 8,
+        "thumb": {
+            "file_id": "AAMCAgADGQEAAgGnYHkor8tL5yXagqckmT9j-cNgKUoAAhoMAAIH67BLASHk-uUcI_2A-E-kLgADAQAHbQADdDoAAh8E",
+            "file_unique_id": "AQADgPhPpC4AA3Q6AAI",
+            "width": 180,
+            "height": 320,
+            "file_size": 14130
+            },
+        "mime_type": "video/mp4",
+        "file_size": 18153228},
+    "new_chat_members": [], "new_chat_photo": [], "delete_chat_photo": False, "group_chat_created": False, "supergroup_chat_created": False, "channel_chat_created": False,
+    "from": {"id": 307775861, "first_name": "Constantine", "is_bot": False, "last_name": "Brit", "username": "Brit_K", "language_code": "en"}}
+

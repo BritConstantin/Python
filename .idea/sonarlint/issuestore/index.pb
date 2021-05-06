@@ -21,19 +21,11 @@ Y
 )bots/file_storage_bot/file_storage_bot.db,1\a\1a3b8130b1fb61f8b4a49d34465f0ba612f9b983
 Y
 )bots/file_storage_bot/file_storage_bot.py,2\a\2a0d8056426f9af3ccadbb48a59c64220d488ef0
-R
-"assignments/conversationbot_3_1.py,b\1\b1bfd1dce279ddb84108ead265a09ae73b3dd8b7
 I
 Hints/message_examples.py,b\c\bc14cb06aa890c55e788fe25fc95c25b55cddad7
 G
 Hints/tg_file_worker.py,8\b\8be7d3cc1a0cfebed40a92e27420834ed0eb1bb5
-N
-Hints/dictionary_check_test.py,e\f\ef3be619984082b1254db9c56b185c99d18cb525
-P
- bots/file_storage_bot/file_3.txt,7\7\776e49d31cf43e4f4037af00221dcbd004ffcc0c
-P
- bots/file_storage_bot/file_4.txt,e\8\e8484f3868a41c13e44ba60bd95268f3c94b6998
-P
- bots/file_storage_bot/file_5.txt,7\8\78ebe4e428ee1f124e1e9041ab0b09e4933aca32
-P
- bots/file_storage_bot/file_6.txt,4\b\4b65edd62144d75395625ccc40aa4011f7f3041c
+C
+Hints/blob_to_db.py,e\3\e31b449d8b6bb48c8f285addfd855e7d12396dc2
+C
+Hints/db_to_blob.py,8\9\8995de608a2fe65e757df2eafc9b1738c33efb36
